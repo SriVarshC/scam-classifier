@@ -104,12 +104,13 @@ class SentenceEncoder:
                 print(f"warning: embedding cache {self.path} is unreadable - rebuilding it")
         self.model = None
         self._unsaved = 0
+        self.persist = True  # the live service sets False: callers' text must not be written to disk
         atexit.register(self.flush)
 
     def flush(self):
         """Atomic save: write a temp file, then replace, so an interrupted run can't corrupt the cache."""
         import os
-        if not self._unsaved or not self.cache:
+        if not self.persist or not self._unsaved or not self.cache:
             return
         tmp = self.path.with_name("emb_cache.tmp.npz")
         np.savez(tmp, keys=np.array(list(self.cache)), vecs=np.stack(list(self.cache.values())))

@@ -170,3 +170,10 @@ Medium 40–69 → Warn, verify, Low 20–39 → Take message, Safe < 20 → All
   ("we will never ask for your PIN", "I'm sending you a code") — negation handling is not implemented.
 - LLM summaries can omit details (one says no payment info was given although the caller got the code);
   the flags and quotes are the verifiable evidence.
+
+## Scam classifier service (JSON API)
+`src/service/` is a FastAPI microservice: POST a transcript to `/v1/classify` and get back
+`{"classes": ["fraud" | "uncertain" | "not_fraud", "risk_level:...", ...], "summary": "..."}` plus details
+(risk score, red flags with quotes, per-window timeline). It is the `CLASSIFIER_URL` for the team's
+transcription API. Fast mode = rules per ~12–15 s window + one LLM call; ~14 s per request locally.
+Full guide: [SERVICE.md](SERVICE.md). Tests: `python -m pytest tests -q` (16 tests, fake LLM).

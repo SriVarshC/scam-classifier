@@ -8,6 +8,15 @@ datasketch
 matplotlib
 tqdm
 tabulate
+pyyaml
+
+# Scam classifier service (src/service)
+fastapi>=0.115
+uvicorn>=0.30
+
+# Tests
+pytest
+httpx
 
 # Optional (DeBERTa, intended for Colab GPU):
 # transformers
