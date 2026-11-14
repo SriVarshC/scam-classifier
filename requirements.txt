@@ -1,0 +1,14 @@
+pandas
+numpy
+scikit-learn
+datasets
+kaggle
+sentence-transformers
+datasketch
+matplotlib
+tqdm
+
+# Optional (DeBERTa, intended for Colab GPU):
+# transformers
+# torch
+# accelerate
