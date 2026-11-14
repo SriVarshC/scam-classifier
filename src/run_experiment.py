@@ -1,6 +1,8 @@
 """Train every model on every split, evaluate, and write results/metrics.csv + results/summary.md.
 
 Usage: python src/run_experiment.py [--models keyword_rules tfidf_lr]
+       python src/run_experiment.py --use-transformer   # DeBERTa only (GPU) -> *_deberta files
+       python src/run_experiment.py --use-llm           # zero-shot LLM only -> *_llm files
 """
 import argparse
 
@@ -9,7 +11,7 @@ import pandas as pd
 
 from config import PROCESSED, RESULTS
 from evaluate import binary_metrics, choose_threshold, fraud_score, predict_types, type_metrics
-from models import MODELS, ZeroShotLLM
+from models import MODELS, OPTIONAL_MODELS, ZeroShotLLM
 
 SPLITS = PROCESSED / "splits"
 TESTS = ["A"] + sorted(p.name[:-len("_test.csv")] for p in SPLITS.glob("B_*_test.csv"))
@@ -47,13 +49,15 @@ def evaluate_one(model, parts, early):
     return row, per_type, per_source
 
 
-def main(model_names):
+def main(model_names, suffix="", model_kwargs=None, tests=None):
     merged = pd.read_csv(PROCESSED / "merged.csv")
     rows, type_rows, source_rows = [], [], []
-    for test in TESTS:
+    for test in tests or TESTS:
         parts = load_split(test, merged)
         for name in model_names:
-            model = MODELS[name]().fit(list(parts["train"]["text"]), parts["train"]["fraud_type"].tolist())
+            print(f"training {name} on {test} ({len(parts['train'])} calls)...", flush=True)
+            model = {**MODELS, **OPTIONAL_MODELS}[name](**(model_kwargs or {})).fit(
+                list(parts["train"]["text"]), parts["train"]["fraud_type"].tolist())
             for early in (False, True):
                 variant = f"first{EARLY_WORDS}" if early else "full"
                 row, per_type, per_source = evaluate_one(model, parts, early)
@@ -62,20 +66,21 @@ def main(model_names):
                                "f1": f, "support": s} for t, (f, s) in per_type.items()]
                 source_rows += [{"model": name, "test": test, "variant": variant, "source": s, **r}
                                 for s, r in per_source.iterrows()]
-                print(f"{name:14s} {test:11s} {variant:8s} FPR={row['fpr']:.3f} recall={row['recall']:.3f} "
-                      f"F1={row['f1_binary']:.3f} AUC={row['roc_auc']:.3f} macroF1(types)={row['macro_f1_types']:.3f}")
+                print(f"{name:14s} {test:22s} {variant:8s} FPR={row['fpr']:.3f} recall={row['recall']:.3f} "
+                      f"F1={row['f1_binary']:.3f} AUC={row['roc_auc']:.3f} "
+                      f"macroF1(types)={row['macro_f1_types']:.3f}", flush=True)
 
     RESULTS.mkdir(exist_ok=True)
     metrics = pd.DataFrame(rows)
-    metrics.to_csv(RESULTS / "metrics.csv", index=False)
+    metrics.to_csv(RESULTS / f"metrics{suffix}.csv", index=False)
     per_type = pd.DataFrame(type_rows)
-    per_type.to_csv(RESULTS / "metrics_per_type.csv", index=False)
+    per_type.to_csv(RESULTS / f"metrics{suffix}_per_type.csv", index=False)
     per_source = pd.DataFrame(source_rows)
-    per_source.to_csv(RESULTS / "metrics_per_source.csv", index=False)
-    write_summary(metrics, per_type)
+    per_source.to_csv(RESULTS / f"metrics{suffix}_per_source.csv", index=False)
+    write_summary(metrics, per_type, suffix)
 
 
-def write_summary(metrics, per_type):
+def write_summary(metrics, per_type, suffix=""):
     cols = ["model", "test", "variant", "fpr", "recall", "precision", "f1_binary", "roc_auc",
             "macro_f1_types", "tn", "fp", "fn", "tp"]
     md = ["# Results\n", "Threshold chosen on validation so FPR <= 2%. `first50` = Test C (first 50 words).\n",
@@ -86,8 +91,8 @@ def write_summary(metrics, per_type):
     md += ["## Per fraud type F1 (full transcripts; types absent from a test set are blank)\n",
            pivot.to_markdown(), "", "Max test support per type: " +
            ", ".join(f"{t}={s}" for t, s in support.items()), ""]
-    (RESULTS / "summary.md").write_text("\n".join(md), encoding="utf-8")
-    print(f"\nresults -> {RESULTS / 'summary.md'}")
+    (RESULTS / f"summary{suffix}.md").write_text("\n".join(md), encoding="utf-8")
+    print(f"\nresults -> {RESULTS / f'summary{suffix}.md'}")
 
 
 def run_llm(llm_model, n_sample, n_early, workers=1):
@@ -139,8 +144,15 @@ if __name__ == "__main__":
     ap.add_argument("--llm-sample", type=int, default=200)
     ap.add_argument("--llm-early-sample", type=int, default=60)
     ap.add_argument("--llm-workers", type=int, default=1, help="parallel requests (= OLLAMA_NUM_PARALLEL)")
+    ap.add_argument("--use-transformer", action="store_true", help="run ONLY fine-tuned DeBERTa (needs a GPU)")
+    ap.add_argument("--deberta-model", default="microsoft/deberta-v3-small")
+    ap.add_argument("--deberta-epochs", type=int, default=3)
+    ap.add_argument("--tests", nargs="+", help="only these splits (default: all)")
     args = ap.parse_args()
-    if args.use_llm:
+    if args.use_transformer:
+        main(["deberta"], suffix="_deberta", tests=args.tests,
+             model_kwargs={"model_name": args.deberta_model, "epochs": args.deberta_epochs})
+    elif args.use_llm:
         run_llm(args.llm_model, args.llm_sample, args.llm_early_sample, args.llm_workers)
     else:
-        main(args.models)
+        main(args.models, tests=args.tests)

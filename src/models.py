@@ -240,5 +240,77 @@ class ZeroShotLLM:
         return out
 
 
+class DebertaClassifier:
+    """Model 3: fine-tuned DeBERTa-v3-small (multi-class F0–F9). Class-weighted cross-entropy,
+    linear warmup/decay, mixed precision on GPU, fixed seed. Intended for a GPU (Colab T4)."""
+
+    def __init__(self, model_name="microsoft/deberta-v3-small", max_len=256, epochs=3, lr=3e-5,
+                 batch_size=16, verbose=True):
+        self.model_name, self.max_len, self.epochs = model_name, max_len, epochs
+        self.lr, self.batch_size, self.verbose = lr, batch_size, verbose
+
+    def _batches(self, enc, order, labels=None):
+        import torch
+        for i in range(0, len(order), self.batch_size):
+            idx = order[i:i + self.batch_size]
+            batch = self.tok.pad({k: [enc[k][j] for j in idx] for k in enc}, return_tensors="pt")
+            batch = {k: v.to(self.device) for k, v in batch.items()}
+            yield batch, (torch.tensor(labels[idx], device=self.device) if labels is not None else None)
+
+    def fit(self, texts, y):
+        import torch
+        from sklearn.utils.class_weight import compute_class_weight
+        from transformers import (AutoModelForSequenceClassification, AutoTokenizer,
+                                  get_linear_schedule_with_warmup, set_seed)
+        set_seed(SEED)
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        if self.device == "cuda":
+            torch.cuda.empty_cache()
+        self.classes_ = np.array(sorted(set(y)))
+        labels = np.searchsorted(self.classes_, y)
+        self.tok = AutoTokenizer.from_pretrained(self.model_name)
+        self.model = AutoModelForSequenceClassification.from_pretrained(
+            self.model_name, num_labels=len(self.classes_), ignore_mismatched_sizes=True).to(self.device)
+        weights = compute_class_weight("balanced", classes=np.arange(len(self.classes_)), y=labels)
+        loss_fn = torch.nn.CrossEntropyLoss(weight=torch.tensor(weights, dtype=torch.float32, device=self.device))
+        enc = self.tok(list(texts), truncation=True, max_length=self.max_len)
+        steps = self.epochs * int(np.ceil(len(labels) / self.batch_size))
+        opt = torch.optim.AdamW(self.model.parameters(), lr=self.lr, weight_decay=0.01)
+        sched = get_linear_schedule_with_warmup(opt, int(0.1 * steps), steps)
+        use_amp = self.device == "cuda"
+        scaler = torch.amp.GradScaler("cuda", enabled=use_amp)
+        rng = np.random.default_rng(SEED)
+        self.model.train()
+        for epoch in range(self.epochs):
+            total, n = 0.0, 0
+            for batch, yb in self._batches(enc, rng.permutation(len(labels)), labels):
+                with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=use_amp):
+                    logits = self.model(**batch).logits
+                loss = loss_fn(logits.float(), yb)
+                opt.zero_grad()
+                scaler.scale(loss).backward()
+                scaler.unscale_(opt)
+                torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
+                scaler.step(opt)
+                scaler.update()
+                sched.step()
+                total, n = total + loss.item() * len(yb), n + len(yb)
+            if self.verbose:
+                print(f"    deberta epoch {epoch + 1}/{self.epochs} loss={total / n:.4f}", flush=True)
+        return self
+
+    def predict_proba(self, texts):
+        import torch
+        self.model.eval()
+        enc = self.tok(list(texts), truncation=True, max_length=self.max_len)
+        out = []
+        with torch.no_grad():
+            for batch, _ in self._batches(enc, np.arange(len(texts))):
+                with torch.autocast(device_type="cuda", dtype=torch.float16, enabled=self.device == "cuda"):
+                    logits = self.model(**batch).logits
+                out.append(torch.softmax(logits.float(), dim=-1).cpu().numpy())
+        return np.concatenate(out)
+
+
 MODELS = {"keyword_rules": KeywordRules, "tfidf_lr": TfidfLR, "embedding_lr": EmbeddingLR}
-OPTIONAL_MODELS = {"zero_shot_llm": ZeroShotLLM}
+OPTIONAL_MODELS = {"zero_shot_llm": ZeroShotLLM, "deberta": DebertaClassifier}

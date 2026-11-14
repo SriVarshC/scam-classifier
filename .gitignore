@@ -30,3 +30,4 @@ Thumbs.db
 # Colab upload bundle / downloaded results
 colab_bundle.zip
 llm_results.zip
+deberta_results.zip
