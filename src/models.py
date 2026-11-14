@@ -270,7 +270,9 @@ class DebertaClassifier:
         labels = np.searchsorted(self.classes_, y)
         self.tok = AutoTokenizer.from_pretrained(self.model_name)
         self.model = AutoModelForSequenceClassification.from_pretrained(
-            self.model_name, num_labels=len(self.classes_), ignore_mismatched_sizes=True).to(self.device)
+            self.model_name, num_labels=len(self.classes_), ignore_mismatched_sizes=True,
+        ).float().to(self.device)  # FP32 master weights: newer transformers keep the checkpoint's FP16 dtype,
+        #                            and GradScaler can't unscale FP16 gradients (autocast still runs in FP16)
         weights = compute_class_weight("balanced", classes=np.arange(len(self.classes_)), y=labels)
         loss_fn = torch.nn.CrossEntropyLoss(weight=torch.tensor(weights, dtype=torch.float32, device=self.device))
         enc = self.tok(list(texts), truncation=True, max_length=self.max_len)
