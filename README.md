@@ -21,19 +21,30 @@ Raw data is **not** committed. Download each dataset into `data/raw/<folder>/` (
 ## Datasets
 | # | Folder | Dataset | Type | Split (train/val/test) | Licence | Status |
 |---|---|---|---|---|---|---|
-| 1 | `abcd` | [ABCD](https://github.com/asappresearch/abcd) | Real, genuine (F0) | 70/15/15 | TBD | not downloaded |
-| 2 | `robocall` | [Robocall Audio Dataset](https://github.com/wspr-ncsu/robocall-audio-dataset) | Real, scam | 60/20/20 | TBD | not downloaded |
-| 3 | `bothbosu` | [BothBosu scam-dialogue](https://huggingface.co/datasets/BothBosu/scam-dialogue) | Synthetic | 100/0/0 | TBD | not downloaded |
-| 4 | `usenix_romance` | [USENIX romance-baiting artifact](https://secartifacts.github.io/usenixsec2026/appendix-files/sec26cycle1ae-final154.pdf) | Synthetic | 100/0/0 | TBD | not downloaded |
-| 5 | `aston_romance` | [Aston Romance Fraud Messages](https://fold.aston.ac.uk/handle/123456789/38) | Real, romance | 60/20/20 | TBD | not downloaded |
+| 1 | `abcd` | [ABCD](https://github.com/asappresearch/abcd) | Real, genuine (F0) | 70/15/15 | MIT | downloaded |
+| 2 | `robocall` | [Robocall Audio Dataset](https://github.com/wspr-ncsu/robocall-audio-dataset) | Real, scam | 60/20/20 | Data: public domain (FTC); docs: CC BY-ND | downloaded |
+| 3 | `bothbosu` | [BothBosu scam-dialogue](https://huggingface.co/datasets/BothBosu/scam-dialogue) | Synthetic | 100/0/0 | Apache-2.0 | downloaded |
+| 4 | `usenix_romance` | [USENIX romance-baiting artifact](https://secartifacts.github.io/usenixsec2026/appendix-files/sec26cycle1ae-final154.pdf) | Synthetic | 100/0/0 | CC-BY-4.0 (Zenodo 10.5281/zenodo.18770783) | downloaded |
+| 5 | `aston_romance` | [Aston Romance Fraud Messages](https://fold.aston.ac.uk/handle/123456789/38) | Real, romance | 60/20/20 | TBD | link needs a browser — pending |
 | 6 | `anatomy_scam` | [Anatomy of a Scam Call](https://tldr.takara.ai/p/2608.24127) | Real, scam | 60/20/20 | TBD | requested from authors |
 | 7 | `synthetic_own` | Own synthetic conversations | Synthetic | 100/0/0 | own | to generate |
 
 ### Fraud-type codes
 | Code | Meaning |
 |---|---|
-| F0 | Genuine / legitimate |
-| F1–F9 | TBD |
+| F0 | Not fraud |
+| F1 | Financial impersonation |
+| F2 | Account takeover |
+| F3 | Government impersonation |
+| F4 | Tech support / business impersonation |
+| F5 | Romance / catfishing |
+| F6 | Pig-butchering / investment |
+| F7 | Honeytrap / sextortion |
+| F8 | Family emergency / voice clone |
+| F9 | Prize / job / advance-fee |
+
+**Task:** transcript → fraud type (F0–F9). Baseline TF-IDF + LR; main model fine-tuned DeBERTa.
+**Targets:** macro F1 ≥ 0.85 on the real test set, FPR on F0 < 2%, retrain any type with F1 < 0.70.
 
 ## Run
 ```bash

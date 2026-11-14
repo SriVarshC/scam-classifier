@@ -19,6 +19,62 @@ honest, reliable signal with very few false alarms — not a perfect score.
 
 ---
 
+## Task spec v2 (current — supersedes binary-only parts below)
+**Input:** call transcript text. **Output:** fraud type F0–F9. The binary scam/legit label
+(`label` = 0 if F0 else 1) is still derived and reported, because FPR is measured on it.
+
+### Fraud labels
+| Code | Meaning |
+|---|---|
+| F0 | Not fraud (includes legal telemarketing, wrong numbers, genuine service calls) |
+| F1 | Financial impersonation (bank, Zelle, card issuer) |
+| F2 | Account takeover |
+| F3 | Government impersonation (IRS, SSA, police) |
+| F4 | Tech support / business impersonation (Amazon, Microsoft, refunds) |
+| F5 | Romance / catfishing |
+| F6 | Pig-butchering / investment |
+| F7 | Honeytrap / sextortion |
+| F8 | Family emergency / voice clone |
+| F9 | Prize / job / advance-fee |
+
+### Models
+- **Baseline:** TF-IDF + logistic regression (multi-class).
+- **Main model:** fine-tuned DeBERTa (GPU; Colab).
+- Keyword rules and embeddings + LR remain as extra baselines.
+
+### Final data mix
+| Item | Rule |
+|---|---|
+| Overall split | 70 / 15 / 15 train / val / test |
+| Synthetic share of training set | At most 30% |
+| Fraud vs genuine in training | About 50 / 50, balanced with class weights |
+| Fraud vs genuine in test | Real-world ratio (mostly genuine) |
+| Leakage prevention | Split by call or scam campaign (group k-fold style; e.g. robocall `case_details`) |
+| Min training examples per fraud type | 300 (top up with synthetic, training only) |
+| Synthetic data in val / test | Never — real data only |
+
+### Good enough
+| Metric | Target |
+|---|---|
+| Macro F1 on real test set | ≥ 0.85 |
+| FPR on genuine calls (F0) | < 2% |
+| Retrain trigger | Any fraud type F1 < 0.70 → add data and retrain |
+
+### Decisions made
+- BothBosu `telemarketing` and `wrong` stay **F0** (fraud-only definition).
+- Robocall non-English rows (54 `zh`) are kept and tagged but **excluded from training/eval**.
+- Robocall rows need a per-row fraud type; legal-telemarketing robocalls → F0.
+
+### Proposed source → fraud-type mapping (verify during loading)
+| Source | Mapping |
+|---|---|
+| ABCD | all F0 |
+| BothBosu | ssn → F3, refund → F4, support → F4, reward → F9; delivery / insurance / telemarketing / wrong → F0 |
+| USENIX | romance_baiting → F5, tax_scam → F3, e-commerce → F4, neutral → F0 |
+| Robocall | per row (expected mostly F1, F3, F4, F9, some F0) — needs labelling |
+
+---
+
 ## Ground rules (always follow)
 1. **Never modify files in `data/raw/`.** All processing writes to `data/processed/`.
 2. **Inspect before mapping.** Before writing a loader, print each raw file's columns,
