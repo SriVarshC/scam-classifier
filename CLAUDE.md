@@ -150,7 +150,11 @@ Kaggle needs `~/.kaggle/kaggle.json` (present on this machine).
 3. Remove URLs and video IDs.
 4. Mask names → `[NAME]` (simple name list / spaCy NER) and digits → `[NUMBER]`.
 5. Drop empty or very short texts (< 10 words).
+5b. Chunk long texts into equal pieces of ≤ 300 words; keep at most 3 per conversation
+    (first, middle, last). Pieces share the parent's `group_id` so splits keep them together.
 6. Remove exact duplicates, then near-duplicates (> 0.95 cosine on embeddings, or MinHash).
+
+(Implementation note: name masking runs before lowercasing because it uses capitalisation.)
 7. Print a summary per source: rows, label counts, mean/median `n_words`.
    Warn if mean length differs > 2× between sources.
 
