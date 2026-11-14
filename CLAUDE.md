@@ -76,6 +76,9 @@ honest, reliable signal with very few false alarms — not a perfect score.
 ---
 
 ## Ground rules (always follow)
+0. **Phone calls only:** every example must be a phone-call transcript (real or synthetic).
+   Never use chats, emails, SMS or typed conversations. Only use the datasets listed in this
+   file. Never add, replace or drop a dataset without asking the user first and explaining why.
 1. **Never modify files in `data/raw/`.** All processing writes to `data/processed/`.
 2. **Inspect before mapping.** Before writing a loader, print each raw file's columns,
    row count, label values and 3 sample rows. Never guess column names.
@@ -96,6 +99,20 @@ honest, reliable signal with very few false alarms — not a perfect score.
 ---
 
 ## Datasets (download into `data/raw/<folder>/`)
+
+### In use (phone calls only — agreed with user 2026-11-14)
+| Folder | Dataset | Real/synthetic | Notes |
+|---|---|---|---|
+| `robocall` | Robocall Audio Dataset | Real | English transcripts only |
+| `youtube_scam` | YouTube Scam Phone Call Transcripts (rivalcults) | Real | all scam |
+| `bothbosu` | BothBosu scam-dialogue | Synthetic | |
+| `kaggle_scam_nonscam` | Scam and Non-Scam Call Conversation Dataset (teeconnie) | Synthetic | template placeholders removed |
+| `call_transcripts` | Call Transcripts Scam Determinations (mealss) | Synthetic | conversation = scam if any turn scam-like; genuine if all neutral/legitimate; else dropped |
+| `usenix_romance` | USENIX artifact — **tax_scam and e-commerce classes only** | Synthetic | phone-call style |
+| `synthetic_own` | Team synthetic calls (`synthetic_fraud_calls.csv`) | Synthetic | |
+
+**Removed (not phone calls):** ABCD (typed chat), USENIX `romance_baiting` (texting) and
+`neutral` (AI-assistant chat). Do not re-add.
 
 ### Primary dataset plan (v2 — current)
 | Order | Folder | Dataset | Type | Fraud types | Train | Val | Test | Link |

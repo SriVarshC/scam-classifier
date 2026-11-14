@@ -57,7 +57,38 @@ python src/analyze.py          # -> results/analysis.md, top_words.txt, errors_f
 ```
 Embeddings need `torch` (CPU is fine: `pip install torch --index-url https://download.pytorch.org/whl/cpu`).
 
-## Results (v1 data — 2026-11-14)
+## Results v2 — phone calls only (2026-11-14)
+Data: 7 phone-call sources (no chats). Only 2 real genuine calls exist, so (Option 1, agreed with
+the user) models are **trained on synthetic calls only**, thresholds are set on synthetic validation
+(FPR ≤ 2%), and tested on:
+- **Test A** — held-out synthetic calls from the same sources (in-distribution).
+- **Test B** — sources never seen in training: average over BothBosu, Kaggle scam/non-scam,
+  call_transcripts and team synthetic (FPR + F1), plus **B_real** = all 819 real calls
+  (Robocall + YouTube; recall only — 2 genuine calls are too few for FPR).
+- **Test C** — Test A recall using only the first 50 words.
+
+| Model | Test A F1 | Test B F1 (avg) | FPR (A) | FPR (B avg) | Real-scam recall (B_real) | Early-decision recall (C) | Fraud-type macro F1 (A) |
+|---|---|---|---|---|---|---|---|
+| Keyword rules | 0.715 | 0.490 | 1.9% | **1.3%** | 22.2% | 28.7% | 0.37 |
+| TF-IDF + LR | 0.993 | 0.738 | 3.0% | 75.0% | 96.5% | 98.8% | 0.98 |
+| Embeddings + LR | 0.985 | 0.746 | 2.7% | 20.1% | 58.8% | 84.6% | 0.97 |
+| DeBERTa (opt.) | — | — | — | — | — | — | — |
+| Zero-shot LLM (opt.) | — | — | — | — | — | — | — |
+
+### Verdict: still "high on A, much lower on B" — no model generalises yet
+- On unseen sources, **TF-IDF flags 75% of genuine calls** (it calls almost everything a scam, which is
+  also why its real-scam recall is high). Embeddings: 20% false alarms, 59% of real scams caught.
+- **Keyword rules are the only model under 2% FPR on unseen sources**, but they catch only 22% of real scams.
+- Hardest unseen source: the team synthetic calls (AUC 0.66–0.72) — realistic genuine bank calls
+  and fraud types (F2, F6, F7) that no other source contains.
+- Remaining shortcut words in the top TF-IDF features: greetings ("hi", "thanks", "this is"),
+  `[NAME]` placeholder n-grams, an unmasked name ("john") and BothBosu's placeholder company "xyz".
+  See [results/top_words.txt](results/top_words.txt).
+- Label-shuffle check passes (AUC 0.52 ± 0.08); no train/test text overlap.
+
+<details><summary>v1 results (with ABCD chats — invalid, kept for reference)</summary>
+
+### v1 (2026-11-14)
 Binary scam-vs-genuine F1; threshold chosen on validation for FPR ≤ 2%. Test A = main split
 (real test data, 6.6% scams). Test B = average of "ABCD held out" and "Robocall held out".
 Early-decision = Test A recall using only the first 50 words. Full details:
@@ -83,3 +114,5 @@ Early-decision = Test A recall using only the first 50 words. Full details:
 
 **Next step:** add real *genuine phone-call* transcripts (ideally bank / payment calls) and the
 Anatomy of a Scam Call corpus, then re-run `python src/run_experiment.py && python src/analyze.py`.
+
+</details>

@@ -47,8 +47,11 @@ def _mask_intro_names(text):
     return NAME_INTRO_RE.sub(repl, text)
 
 
+SOURCE_PLACEHOLDER_RE = re.compile(r"\[[A-Za-z][A-Za-z _/-]*\]")  # template slots e.g. [Company], [Money]
+
+
 def clean_text(text, known_names=""):
-    text = str(text)
+    text = SOURCE_PLACEHOLDER_RE.sub(" ", str(text))  # removed from every source -> no placeholder shortcut
     text = URL_RE.sub(" ", EMAIL_RE.sub(" [EMAIL] ", text))
     for full in filter(None, str(known_names).split("|")):
         for part in sorted({full, *full.split()}, key=len, reverse=True):

@@ -17,11 +17,14 @@ from models import TfidfLR
 from run_experiment import TESTS, load_split
 from config import PROCESSED
 
-# Tokens that describe *format* (transcription, chat UI, masking) rather than scam content.
-SUSPICIOUS = {"uh", "um", "hmm", "ok", "okay", "number", "name", "email", "press", "press number", "id",
-              "order id", "hi", "thanks", "thank", "thank you", "help you", "can help", "anything else",
-              "is there", "there anything", "great", "caller", "receiver", "agent", "customer", "user",
-              "assistant", "recipient", "this is", "call", "speak", "talk", "yeah", "please press"}
+# Tokens that describe *format* (greetings, call openers, transcription fillers, IVR prompts,
+# speaker tags, masking placeholders) rather than scam content.
+SUSPICIOUS = {"uh", "um", "hmm", "ok", "okay", "yeah", "number", "name", "email", "press", "press number",
+              "please press", "id", "order id", "hi", "hello", "hey", "good morning", "good afternoon",
+              "thanks", "thank", "thank you", "how can", "can help", "help you", "can i", "i help",
+              "help you today", "how may", "may i", "anything else", "is there", "there anything", "great",
+              "caller", "receiver", "agent", "customer", "user", "assistant", "recipient", "speaker",
+              "this is", "calling", "call", "speak", "talk", "ma am", "sir", "goodbye", "bye", "have a"}
 
 
 def top_words(model, k=30):
@@ -61,11 +64,14 @@ def gap_table():
     m = pd.read_csv(RESULTS / "metrics.csv")
     m = m[m["variant"] == "full"]
     a = m[m["test"] == "A"].set_index("model")
-    b = m[m["test"] != "A"].groupby("model")[["f1_binary", "fpr", "recall", "roc_auc"]].mean()
-    return pd.DataFrame({"A F1": a["f1_binary"], "B F1 (avg)": b["f1_binary"],
+    loso = m[m["test"].str.startswith("B_") & (m["test"] != "B_real")]  # unseen synthetic sources
+    b = loso.groupby("model")[["f1_binary", "fpr", "recall", "roc_auc"]].mean()
+    real = m[m["test"] == "B_real"].set_index("model")
+    return pd.DataFrame({"A F1": a["f1_binary"], "B F1 (avg unseen sources)": b["f1_binary"],
                          "gap F1": a["f1_binary"] - b["f1_binary"],
                          "A FPR": a["fpr"], "B FPR (avg)": b["fpr"],
-                         "A AUC": a["roc_auc"], "B AUC (avg)": b["roc_auc"]}).round(3)
+                         "A AUC": a["roc_auc"], "B AUC (avg)": b["roc_auc"],
+                         "real-scam recall (B_real)": real["recall"]}).round(3)
 
 
 def shuffle_check(merged, seeds=(SEED, 0, 1, 2, 3)):
@@ -110,7 +116,7 @@ def main():
           f"exact train/test text overlap = {sh['text_overlap']}. "
           f"{'PASS — ≈ 0.5, no leakage through the pipeline.' if ok else 'FAIL — investigate leakage.'}", ""]
     (RESULTS / "analysis.md").write_text("\n".join(md), encoding="utf-8")
-    print("\n".join(md))
+    print("\n".join(md).encode("ascii", "replace").decode())  # Windows console can't print ≈ / —
 
 
 if __name__ == "__main__":

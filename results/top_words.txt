@@ -1,29 +1,26 @@
-== F0 (14/30 flagged as format/style tokens)
-help, *help you*, *ok*, *thanks*, *can help*, *id*, *great*, *anything else*, else, order, *name*, may, *thank*, *thank you*, anything, how, day, today, you with, *hi*, can, *there anything*, *is there*, *order id*, you today, account id, have, would, how can, hello
+== F0 (6/30 flagged as format/style tokens)
+would, *this is*, john, *thanks*, is from, *hi*, new, insurance, wanted, would you, wanted to, xyz, offering, from xyz, the wrong, delivery, you like, *is name*, re offering, just wanted, package, interested, re verified, let us, *name we*, dialed, company, thanks for, business, *wrong number*
 
 == F1 (2/30 flagged as format/style tokens)
-bank, branch, zelle, charge, card, rate, interest rate, fraud, text, was that, interest, *number from*, the bank, code, from, reversal, fargo, credit, the branch, wells fargo, wells, services there, the charge, no didn, card services, *for number*, hi this, there pending, live operator, operator and
+bank, bank account, *account number*, account, credit, branch, charge, text, zelle, kindly, was that, the bank, this bank, card, credit card, the charge, have won, pin, and credit, reversal, the branch, your credit, we are, provide your, *number from*, have been, your bank, no didn, us your, savings
 
-== F2 (3/30 flagged as format/style tokens)
-the account, can you, send, for calling, last four, four, can, union, bank this, on file, file, *the number*, you verify, and need, need to, *this is*, banking, online banking, *email*, need, birth, phone, send it, of birth, bank, hospital, the hospital, add, wire, verify
+== F2 (4/30 flagged as format/style tokens)
+*can help*, the account, *how can*, can, help, add, *email*, for calling, can you, bank this, send, on file, and need, *the number*, union, my, online banking, file, is in, my online, send it, need, reset, you verify, of attorney, the hospital, banking, last four, hospital, four
 
-== F3 (3/30 flagged as format/style tokens)
-irs, social security, social, officer, *security number*, the irs, your social, federal, tax, security, legal, *press*, action, arrest, warrant, case, suspended, security administration, more information, administration, fraudulent, your case, benefits, serious, matter, *press number*, department, compliance, activity, taxes
+== F3 (2/30 flagged as format/style tokens)
+irs, social security, social, the irs, *security number*, tax, your social, security, matter, payment, taxes, officer, not, do not, federal, badge, *badge number*, case, will, benefits, legal, action, arrest, compliance, immediate, administration, issue, security administration, cooperate, serious
 
-== F4 (4/30 flagged as format/style tokens)
-amazon, *press*, *press number*, *number to*, refund, virus, computer, your amazon, amazon account, the refund, support, unauthorized, process, *please press*, microsoft, secure, your computer, our, from amazon, my computer, apple, warranty, discount, service, pro, once, windows, so can, electric, account
-
-== F5 (0/30 flagged as format/style tokens)
-maybe, little, honestly, even, feel, people, someone, love, always, sometimes, making, promise, dreams, ever, hey there, who, dream, than, feels, coffee, kind, goodnight, hope, just, you re, stories, make, kind of, you ever, hey
+== F4 (2/30 flagged as format/style tokens)
+amazon, refund, the refund, computer, your account, your computer, account, virus, your amazon, process, system, secure, *thank you*, *thank*, amazon account, unauthorized, safe, microsoft, for your, please, amazon gift, windows, my computer, now, technical, that, any, support, access, from amazon
 
 == F6 (0/30 flagged as format/style tokens)
-crypto, withdraw, last week, week, percent, from the, trade, deposit, group, investment, last, mentor, members, withdrawal, from, funds, thirty percent, capital, our members, to trade, professor, borrow it, borrow, money, club, can borrow, is frozen, to withdraw, chat last, withdraw my
+crypto, withdraw, week, last week, percent, members, trade, capital, but the, deposit, maybe, group, professor, from the, borrow it, borrow, our members, withdrawal, mentor, last, investment, can borrow, nice, thirty percent, to trade, profits but, chat last, my profits, it, take out
 
-== F7 (3/30 flagged as format/style tokens)
-video, recorded, your contacts, contacts, your camera, camera, delete, *number in*, hi it, your family, video call, *send number*, that call, *pay number*, delete it, and your, private, tonight, send, call was, your device, was recorded, device, the dating, me from, dating, the video, last night, have everything, family
+== F7 (4/30 flagged as format/style tokens)
+video, recorded, your contacts, contacts, your camera, camera, delete, hi it, *number in*, your family, video call, tonight, that call, *send number*, *hey*, delete it, *pay number*, call was, dating, was recorded, the dating, and your, know, private, have everything, your device, family, me from, device, who is
 
 == F8 (1/30 flagged as format/style tokens)
-*talk*, talk to, he, anyone, they, his, stay, she, can talk, dad, stay on, emergency, mom, gift cards, it me, needs, in gift, me please, grandson, the store, crying, hang up, bail, hang, the police, hurt, police, cards, accident, they re
+they, *talk*, talk to, he, grandson, anyone, his, she, emergency, bail, can talk, dad, please, me please, needs, in gift, stay, your grandson, have your, it me, mom, they re, hurt, on this, was in, accident, no time, crying, watching you, hang
 
-== F9 (3/30 flagged as format/style tokens)
-gift card, gift, card, the gift, supervisor, walmart, selected, offer, rewards, to receive, information, *number gift*, receive, *call*, promotion, amazing, free, legitimate, website, legitimate offer, can you, your supervisor, company, sounds amazing, prize, processing fee, program, customers, *uh*, processing
+== F9 (1/30 flagged as format/style tokens)
+gift card, gift, card, the gift, selected, offer, walmart, information, *number gift*, rewards, supervisor, loan, amazing, website, our, sounds amazing, randomly, prize, free, been selected, this gift, congratulations, reward, card from, selected to, you ve, legitimate offer, amazing how, to receive, it is

@@ -12,7 +12,7 @@ from evaluate import binary_metrics, choose_threshold, fraud_score, predict_type
 from models import MODELS
 
 SPLITS = PROCESSED / "splits"
-TESTS = ["A", "B_abcd", "B_robocall"]
+TESTS = ["A"] + sorted(p.name[:-len("_test.csv")] for p in SPLITS.glob("B_*_test.csv"))
 EARLY_WORDS = 50
 
 
