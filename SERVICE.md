@@ -25,7 +25,7 @@ Built to be called by the team's transcription API (`call_audio_starter`, branch
 ```json
 {
   "request_id": "abc-123",
-  "classes": ["fraud", "risk_level:high", "risk_score:100", "recommendation:reject",
+  "classes": ["fraud", "category:F1", "risk_level:high", "risk_score:100", "recommendation:reject",
               "type:financial_impersonation", "llm_verdict:scam",
               "flag:F17", "flag:F02", "flag:F20", "flag:F01", "flag:F13"],
   "summary": "The caller claimed to be from the fraud department at the bank and said they detected a suspicious transfer. They asked the person to read back a verification code and not to tell anyone at the branch about the call.",
@@ -43,6 +43,10 @@ the other fields are for anyone calling this service directly.
 **`classes[0]` is the decision:** `fraud`, `uncertain` or `not_fraud`.
 - risk level High → `fraud`; Medium → `fraud` if the LLM also says scam, else `uncertain`;
   Low / Safe → `uncertain` if the LLM says scam, else `not_fraud`.
+- **`classes[1]` is `category:<code>`** for the CallGuard dashboard: `F0`–`F9`, or `unknown` (fraud/uncertain
+  but no type). `not_fraud` → `F0`; otherwise `likely_scam_type` maps 1:1: not fraud F0, financial impersonation F1,
+  account takeover F2, government impersonation F3, tech support / business impersonation F4, romance F5,
+  investment / crypto F6, sextortion F7, family emergency F8, prize / job / advance fee F9.
 - The other classes are `key:value` details: `risk_level`, `risk_score` (0–100, **not a probability**),
   `recommendation`, `type`, `llm_verdict`, and one `flag:<id>` per red flag.
 

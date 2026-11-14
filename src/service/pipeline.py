@@ -35,6 +35,25 @@ def label_for(level, llm_verdict):
     return "uncertain" if llm_verdict == "scam" else "not_fraud"
 
 
+# The LLM's scam types (call_analysis.llm.SCAM_TYPES) mapped to the dashboard's F0-F9 codes.
+# Output mapping only: no change to the model or its decision.
+TYPE_TO_CATEGORY = {
+    "not fraud": "F0", "financial impersonation": "F1", "account takeover": "F2",
+    "government impersonation": "F3", "tech support / business impersonation": "F4",
+    "romance": "F5", "investment / crypto": "F6", "sextortion": "F7",
+    "family emergency": "F8", "prize / job / advance fee": "F9",
+}
+
+
+def category_for(label, scam_type):
+    """F0-F9 code for the dashboard, or "unknown". The decision (label) wins: not_fraud -> F0;
+    fraud/uncertain -> the LLM's type, or "unknown" if it gave none (or said "not fraud")."""
+    if label == "not_fraud":
+        return "F0"
+    code = TYPE_TO_CATEGORY.get(str(scam_type).strip().lower())
+    return code if code and code != "F0" else "unknown"
+
+
 def _slug(text):
     return "_".join(str(text).lower().replace("/", " ").split())[:60] or "unknown"
 
@@ -129,7 +148,8 @@ class ScamService:
             notes.append(f"{llm_problem}; result is based on rules and the classifier only.")
         notes.append("Speaker roles are unknown for API text, so flags are checked on every line.")
 
-        classes = [label, f"risk_level:{level.lower()}", f"risk_score:{score}",
+        category = category_for(label, scam_type)
+        classes = [label, f"category:{category}", f"risk_level:{level.lower()}", f"risk_score:{score}",
                    f"recommendation:{_slug(recommendation)}", f"type:{_slug(scam_type)}",
                    f"llm_verdict:{_slug(verdict)}"]
         classes += [f"flag:{f['id']}" for f in sorted(reds, key=lambda f: f["timestamp_s"])]
@@ -140,7 +160,7 @@ class ScamService:
             "classes": classes,
             "summary": summary,
             # --- extra detail for direct JSON consumers (ignored by the transcription API) ---
-            "label": label, "risk_score": score, "risk_level": level, "recommendation": recommendation,
+            "label": label, "category": category, "risk_score": score, "risk_level": level, "recommendation": recommendation,
             "llm_verdict": verdict, "likely_scam_type": scam_type,
             "claimed_identity": llm_out["claimed_identity"] if llm_out else "unknown",
             "caller_request": llm_out["caller_request"] if llm_out else "unknown",

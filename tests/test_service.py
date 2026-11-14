@@ -87,3 +87,20 @@ def test_same_input_same_output(service):
 
 def test_empty_text_rejected(service):
     assert post(client(service), "   ").status_code == 422
+
+
+def test_category_mapping_covers_every_llm_type():
+    from call_analysis.llm import SCAM_TYPES
+    from service.pipeline import TYPE_TO_CATEGORY, category_for
+    assert set(TYPE_TO_CATEGORY) == {t for t in SCAM_TYPES if t != "unknown"}
+    assert category_for("not_fraud", "financial impersonation") == "F0"
+    assert category_for("fraud", "Government impersonation") == "F3"
+    assert category_for("uncertain", "prize / job / advance fee") == "F9"
+    assert category_for("fraud", "unknown") == "unknown"
+    assert category_for("fraud", "not fraud") == "unknown"
+
+
+def test_category_class_is_second(service):
+    body = service.analyze("hi this is the bank, please read me the code we sent you", "t-cat")
+    assert body["classes"][1] == "category:" + body["category"]
+    assert body["category"] in {f"F{i}" for i in range(10)} | {"unknown"}
