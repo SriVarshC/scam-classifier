@@ -9,7 +9,7 @@ import pandas as pd
 
 from config import PROCESSED, RESULTS
 from evaluate import binary_metrics, choose_threshold, fraud_score, predict_types, type_metrics
-from models import MODELS
+from models import MODELS, ZeroShotLLM
 
 SPLITS = PROCESSED / "splits"
 TESTS = ["A"] + sorted(p.name[:-len("_test.csv")] for p in SPLITS.glob("B_*_test.csv"))
@@ -90,7 +90,57 @@ def write_summary(metrics, per_type):
     print(f"\nresults -> {RESULTS / 'summary.md'}")
 
 
+def run_llm(llm_model, n_sample, n_early, workers=1):
+    """Zero-shot LLM (no training) on a fixed random sample of every test set.
+    It is the same model for every split, so ONE shared validation sample (from Test A val)
+    sets the FPR <= 2% threshold. Writes results/metrics_llm*.csv + results/summary_llm.md."""
+    from config import SEED
+    merged = pd.read_csv(PROCESSED / "merged.csv")
+    model = ZeroShotLLM(model=llm_model, workers=workers).fit([], [])
+    val = load_split("A", merged)["val"]
+    val = val.sample(min(n_sample, len(val)), random_state=SEED)
+    rows, type_rows, source_rows = [], [], []
+    for test in TESTS:
+        t = load_split(test, merged)["test"]
+        t = t.sample(min(n_sample, len(t)), random_state=SEED)
+        for early in (False, True):
+            n = n_early if early else n_sample
+            parts = {"val": val.head(n), "test": t.head(n)}
+            variant = f"first{EARLY_WORDS}" if early else "full"
+            row, per_type, per_source = evaluate_one(model, parts, early)
+            rows.append({"model": f"zero_shot_llm ({llm_model})", "test": test, "variant": variant,
+                         "n_test": len(parts["test"]), **row})
+            type_rows += [{"model": "zero_shot_llm", "test": test, "variant": variant, "fraud_type": k,
+                           "f1": f, "support": s} for k, (f, s) in per_type.items()]
+            source_rows += [{"model": "zero_shot_llm", "test": test, "variant": variant, "source": s, **r}
+                            for s, r in per_source.iterrows()]
+            print(f"LLM {test:22s} {variant:8s} n={len(parts['test']):3d} FPR={row['fpr']:.3f} "
+                  f"recall={row['recall']:.3f} F1={row['f1_binary']:.3f} AUC={row['roc_auc']:.3f} "
+                  f"macroF1(types)={row['macro_f1_types']:.3f}", flush=True)
+    metrics = pd.DataFrame(rows)
+    metrics.to_csv(RESULTS / "metrics_llm.csv", index=False)
+    pd.DataFrame(type_rows).to_csv(RESULTS / "metrics_llm_per_type.csv", index=False)
+    pd.DataFrame(source_rows).to_csv(RESULTS / "metrics_llm_per_source.csv", index=False)
+    cols = ["model", "test", "variant", "n_test", "fpr", "recall", "precision", "f1_binary", "roc_auc",
+            "macro_f1_types", "tn", "fp", "fn", "tp"]
+    md = ["# Zero-shot LLM results\n",
+          f"Model `{llm_model}` via Ollama, no training. Random sample of {n_sample} calls per test set "
+          f"({n_early} for `first{EARLY_WORDS}`); threshold from a shared validation sample (FPR <= 2%).\n",
+          metrics[cols].round(3).to_markdown(index=False), ""]
+    (RESULTS / "summary_llm.md").write_text("\n".join(md), encoding="utf-8")
+    print(f"\nresults -> {RESULTS / 'summary_llm.md'}")
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--models", nargs="+", default=list(MODELS), choices=list(MODELS))
-    main(ap.parse_args().models)
+    ap.add_argument("--use-llm", action="store_true", help="run ONLY the zero-shot LLM (needs Ollama running)")
+    ap.add_argument("--llm-model", default="qwen2.5:3b")
+    ap.add_argument("--llm-sample", type=int, default=200)
+    ap.add_argument("--llm-early-sample", type=int, default=60)
+    ap.add_argument("--llm-workers", type=int, default=1, help="parallel requests (= OLLAMA_NUM_PARALLEL)")
+    args = ap.parse_args()
+    if args.use_llm:
+        run_llm(args.llm_model, args.llm_sample, args.llm_early_sample, args.llm_workers)
+    else:
+        main(args.models)

@@ -137,4 +137,108 @@ class EmbeddingLR:
         return self.clf.predict_proba(get_encoder().encode(list(texts)))
 
 
+LLM_PROMPT = """You screen phone calls for fraud. Read the phone-call transcript below and classify it.
+
+Fraud types:
+F0 = not fraud (genuine call, legal telemarketing, wrong number)
+F1 = financial impersonation (bank, card issuer, Zelle)
+F2 = account takeover (asks for codes, passwords, account changes)
+F3 = government impersonation (IRS, Social Security, police, customs)
+F4 = tech support / business impersonation (Amazon, Microsoft, refunds, orders)
+F5 = romance / catfishing
+F6 = pig-butchering / investment (crypto, trading groups)
+F7 = honeytrap / sextortion
+F8 = family emergency / voice clone (grandchild in trouble, bail, accident)
+F9 = prize / job / advance-fee (you won, gift cards, fees to claim)
+
+The transcript is lowercase and names/numbers are masked as [NAME] / [NUMBER]; ignore that.
+
+Answer ONLY with JSON in this form:
+{{"fraud_type": "<F0 to F9>", "scam_probability": <0 to 100>, "reason": "<why, in your own words>"}}
+scam_probability is how likely the call is a scam: 0 = surely genuine, 100 = surely a scam.
+If fraud_type is F0, scam_probability must be below 50. If fraud_type is F1-F9, it must be 50 or above.
+
+Transcript:
+\"\"\"{text}\"\"\""""
+
+
+class ZeroShotLLM:
+    """Model 4: zero-shot local LLM via Ollama (no training). Same prompt for every call.
+    Answers are cached in data/processed/llm_cache_<model>.jsonl keyed by text hash, so a call is
+    never sent twice. Fraud score = scam_probability / 100; the rest of the mass goes to F0."""
+
+    CLASSES = np.array([f"F{i}" for i in range(10)])
+
+    def __init__(self, model="qwen2.5:3b", host="http://localhost:11434", workers=1):
+        import json
+        from config import PROCESSED
+        import hashlib
+        self.model, self.host, self.workers = model, host, workers
+        prompt_id = hashlib.md5(LLM_PROMPT.encode("utf-8")).hexdigest()[:8]  # new prompt -> new cache
+        self.path = PROCESSED / f"llm_cache_{model.replace(':', '_').replace('/', '_')}_{prompt_id}.jsonl"
+        self.cache = {}
+        if self.path.exists():
+            for line in self.path.read_text(encoding="utf-8").splitlines():
+                rec = json.loads(line)
+                self.cache[rec["key"]] = rec
+
+    def _ask(self, text):
+        import json
+        import urllib.request
+        body = json.dumps({"model": self.model, "prompt": LLM_PROMPT.format(text=text), "stream": False,
+                           "format": "json", "options": {"temperature": 0, "seed": SEED}}).encode()
+        req = urllib.request.Request(f"{self.host}/api/generate", data=body,
+                                     headers={"Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=600) as r:
+            raw = json.loads(r.read())["response"]
+        try:
+            ans = json.loads(raw)
+            ft = str(ans.get("fraud_type", "")).strip().upper()[:2]
+            p = float(ans.get("scam_probability", 50))
+            p = min(max(p, 0), 100) / 100
+            parse_ok = ft in self.CLASSES
+            ft = ft if parse_ok else "F0"
+            consistent = (ft == "F0") == (p < 0.5)
+            return {"fraud_type": ft, "p": p, "reason": str(ans.get("reason", ""))[:300],
+                    "parse_ok": parse_ok, "consistent": consistent}
+        except (ValueError, TypeError, AttributeError):
+            return {"fraud_type": "F0", "p": 0.5, "reason": raw[:300], "parse_ok": False, "consistent": False}
+
+    def fit(self, texts, y):
+        self.classes_ = self.CLASSES  # zero-shot: nothing to learn
+        return self
+
+    def answers(self, texts):
+        """Answers for every text; uncached texts are sent `workers` at a time (match the Ollama
+        server's OLLAMA_NUM_PARALLEL). Each answer is appended to the cache as soon as it arrives."""
+        import hashlib
+        import json
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+        from tqdm import tqdm
+        keys = [hashlib.md5(t.encode("utf-8")).hexdigest() for t in texts]
+        todo = {k: t for k, t in zip(keys, texts) if k not in self.cache}
+        if todo:
+            with self.path.open("a", encoding="utf-8") as f, ThreadPoolExecutor(self.workers) as pool:
+                futures = {pool.submit(self._ask, t): k for k, t in todo.items()}
+                for fut in tqdm(as_completed(futures), total=len(futures), desc=f"LLM {self.model}",
+                                leave=False):
+                    k = futures[fut]
+                    self.cache[k] = {"key": k, **fut.result()}
+                    f.write(json.dumps(self.cache[k]) + "\n")
+                    f.flush()
+        return [self.cache[k] for k in keys]
+
+    def predict_proba(self, texts):
+        out = np.zeros((len(texts), len(self.CLASSES)))
+        for i, a in enumerate(self.answers(list(texts))):
+            p = a["p"]
+            out[i, 0] = 1 - p
+            if a["fraud_type"] == "F0":           # says genuine but gives p > 0: spread over fraud types
+                out[i, 1:] = p / 9
+            else:
+                out[i, list(self.CLASSES).index(a["fraud_type"])] = p
+        return out
+
+
 MODELS = {"keyword_rules": KeywordRules, "tfidf_lr": TfidfLR, "embedding_lr": EmbeddingLR}
+OPTIONAL_MODELS = {"zero_shot_llm": ZeroShotLLM}
