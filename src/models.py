@@ -82,4 +82,59 @@ class TfidfLR:
         return self.clf.predict_proba(self.vec.transform(texts))
 
 
-MODELS = {"keyword_rules": KeywordRules, "tfidf_lr": TfidfLR}
+class SentenceEncoder:
+    """all-MiniLM-L6-v2 with an on-disk cache (data/processed/emb_cache.npz) keyed by text hash,
+    so each text is encoded once across all splits and runs."""
+
+    MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
+
+    def __init__(self):
+        from config import PROCESSED
+        self.path = PROCESSED / "emb_cache.npz"
+        self.cache = {}
+        if self.path.exists():
+            data = np.load(self.path)
+            self.cache = dict(zip(data["keys"], data["vecs"]))
+        self.model = None
+
+    def encode(self, texts):
+        import hashlib
+        keys = [hashlib.md5(t.encode("utf-8")).hexdigest() for t in texts]
+        missing = sorted({k: t for k, t in zip(keys, texts) if k not in self.cache}.items())
+        if missing:
+            if self.model is None:
+                from sentence_transformers import SentenceTransformer
+                self.model = SentenceTransformer(self.MODEL_NAME, device="cpu")
+            vecs = self.model.encode([t for _, t in missing], batch_size=64, show_progress_bar=True,
+                                     normalize_embeddings=True)
+            self.cache.update({k: v for (k, _), v in zip(missing, vecs)})
+            np.savez(self.path, keys=np.array(list(self.cache)), vecs=np.stack(list(self.cache.values())))
+        return np.stack([self.cache[k] for k in keys])
+
+
+_ENCODER = None
+
+
+def get_encoder():
+    global _ENCODER
+    if _ENCODER is None:
+        _ENCODER = SentenceEncoder()
+    return _ENCODER
+
+
+class EmbeddingLR:
+    """Model 2: MiniLM sentence embeddings + logistic regression, class_weight='balanced'."""
+
+    def __init__(self, C=1.0):
+        self.clf = LogisticRegression(C=C, class_weight="balanced", max_iter=3000, random_state=SEED)
+
+    def fit(self, texts, y):
+        self.clf.fit(get_encoder().encode(list(texts)), y)
+        self.classes_ = self.clf.classes_
+        return self
+
+    def predict_proba(self, texts):
+        return self.clf.predict_proba(get_encoder().encode(list(texts)))
+
+
+MODELS = {"keyword_rules": KeywordRules, "tfidf_lr": TfidfLR, "embedding_lr": EmbeddingLR}

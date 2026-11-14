@@ -241,6 +241,9 @@ python src/run_experiment.py --use-transformer --use-llm   # optional models
 ---
 
 ## Order of work
+Status (2026-11-14): steps 1–8 done on v1 data; step 9 not started. Main finding: source-style
+shortcut (ABCD chat vs robocall) — need real genuine phone calls before results are meaningful.
+
 1. Set up project, `requirements.txt`, folders. ✅
 2. Download datasets; **inspect each and show the user the columns before writing loaders.**
 3. Loaders → merge → clean → print summary. Stop and show the summary.

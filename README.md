@@ -48,17 +48,38 @@ Raw data is **not** committed. Download each dataset into `data/raw/<folder>/` (
 
 ## Run
 ```bash
-python src/load_data.py
-python src/clean.py
-python src/split.py
-python src/run_experiment.py
+python src/inspect_raw.py      # look at raw data (read-only)
+python src/load_data.py        # -> data/processed/raw_merged.csv
+python src/clean.py            # -> data/processed/merged.csv + results/data_summary.md
+python src/split.py            # -> data/processed/splits/ + results/split_summary.md
+python src/run_experiment.py   # -> results/metrics*.csv + results/summary.md
+python src/analyze.py          # -> results/analysis.md, top_words.txt, errors_fp/fn.csv
 ```
+Embeddings need `torch` (CPU is fine: `pip install torch --index-url https://download.pytorch.org/whl/cpu`).
 
-## Results
-| Model | Test A F1 | Test B F1 (avg) | FPR | Recall @ 2% FPR | Early-decision recall |
-|---|---|---|---|---|---|
-| Keyword rules | | | | | |
-| TF-IDF + LR | | | | | |
-| Embeddings + LR | | | | | |
-| DeBERTa (opt.) | | | | | |
-| Zero-shot LLM (opt.) | | | | | |
+## Results (v1 data — 2026-11-14)
+Binary scam-vs-genuine F1; threshold chosen on validation for FPR ≤ 2%. Test A = main split
+(real test data, 6.6% scams). Test B = average of "ABCD held out" and "Robocall held out".
+Early-decision = Test A recall using only the first 50 words. Full details:
+[results/summary.md](results/summary.md), [results/analysis.md](results/analysis.md).
+
+| Model | Test A F1 | Test B F1 (avg) | FPR (A) | FPR (B avg) | Recall @ 2% FPR (A) | Early-decision recall | Fraud-type macro F1 (A) |
+|---|---|---|---|---|---|---|---|
+| Keyword rules | 0.000 | 0.044 | 2.1% | 7.6% | 0.000 | 0.221 | 0.19 |
+| TF-IDF + LR | 0.878 | 0.496 | 2.0% | 46.7% | 1.000 | 1.000 | 0.83 |
+| Embeddings + LR | 0.860 | 0.435 | 2.3% | 12.4% | 1.000 | 1.000 | 0.68 |
+| DeBERTa (opt.) | — | — | — | — | — | — | — |
+| Zero-shot LLM (opt.) | — | — | — | — | — | — | — |
+
+### Verdict: high on A, much lower on B → the models learned dataset style, not scam language
+- Test A looks near-perfect (AUC 1.000) because every real genuine example is a typed ABCD chat and
+  every real scam is a recorded robocall. Top TF-IDF features for "genuine" are chat phrases
+  ("help you", "order id", "anything else"); for "scam" they are call phrases ("press [NUMBER]", "uh").
+- When ABCD is held out, TF-IDF flags **93%** of genuine chats as scams (embeddings: 25%).
+- Keyword rules fail because ABCD's shopping chats are full of words like "refund", "order", "password".
+- Label-shuffle check passes (AUC 0.56 ± 0.07, no train/test text overlap) — the pipeline does not leak.
+- Only 104 real scam calls are in the test set (F1 10, F3 49, F4 40, F9 5); F2, F5–F8 have no real
+  test data, so their scores can't be measured yet.
+
+**Next step:** add real *genuine phone-call* transcripts (ideally bank / payment calls) and the
+Anatomy of a Scam Call corpus, then re-run `python src/run_experiment.py && python src/analyze.py`.

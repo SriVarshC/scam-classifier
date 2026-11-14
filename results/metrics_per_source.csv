@@ -7,6 +7,10 @@ tfidf_lr,A,full,abcd,1464.0,0.01980874316939891,0.0
 tfidf_lr,A,full,robocall,104.0,1.0,1.0
 tfidf_lr,A,first50,abcd,1464.0,0.020491803278688523,0.0
 tfidf_lr,A,first50,robocall,104.0,1.0,1.0
+embedding_lr,A,full,abcd,1464.0,0.023224043715846996,0.0
+embedding_lr,A,full,robocall,104.0,1.0,1.0
+embedding_lr,A,first50,abcd,1464.0,0.018442622950819672,0.0
+embedding_lr,A,first50,robocall,104.0,1.0,1.0
 keyword_rules,B_abcd,full,abcd,10252.0,0.11383144752243465,0.0
 keyword_rules,B_abcd,full,robocall,104.0,0.10576923076923077,1.0
 keyword_rules,B_abcd,first50,abcd,10252.0,0.014143581740148264,0.0
@@ -15,6 +19,10 @@ tfidf_lr,B_abcd,full,abcd,10252.0,0.9324034334763949,0.0
 tfidf_lr,B_abcd,full,robocall,104.0,1.0,1.0
 tfidf_lr,B_abcd,first50,abcd,10252.0,0.7983808037456106,0.0
 tfidf_lr,B_abcd,first50,robocall,104.0,1.0,1.0
+embedding_lr,B_abcd,full,abcd,10252.0,0.2463909481076863,0.0
+embedding_lr,B_abcd,full,robocall,104.0,0.9134615384615384,1.0
+embedding_lr,B_abcd,first50,abcd,10252.0,0.23809988294966836,0.0
+embedding_lr,B_abcd,first50,robocall,104.0,0.9230769230769231,1.0
 keyword_rules,B_robocall,full,abcd,1464.0,0.0389344262295082,0.0
 keyword_rules,B_robocall,full,robocall,592.0,0.04054054054054054,0.9966216216216216
 keyword_rules,B_robocall,first50,abcd,1464.0,0.017759562841530054,0.0
@@ -23,3 +31,7 @@ tfidf_lr,B_robocall,full,abcd,1464.0,0.0,0.0
 tfidf_lr,B_robocall,full,robocall,592.0,0.9425675675675675,0.9966216216216216
 tfidf_lr,B_robocall,first50,abcd,1464.0,0.0047814207650273225,0.0
 tfidf_lr,B_robocall,first50,robocall,592.0,0.9408783783783784,0.9966216216216216
+embedding_lr,B_robocall,full,abcd,1464.0,0.0006830601092896175,0.0
+embedding_lr,B_robocall,full,robocall,592.0,0.6672297297297297,0.9966216216216216
+embedding_lr,B_robocall,first50,abcd,1464.0,0.00273224043715847,0.0
+embedding_lr,B_robocall,first50,robocall,592.0,0.6807432432432432,0.9966216216216216
