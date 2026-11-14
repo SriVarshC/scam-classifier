@@ -72,8 +72,10 @@ the user) models are **trained on synthetic calls only**, thresholds are set on 
 | Keyword rules | 0.715 | 0.490 | 1.9% | **1.3%** | 22.2% | 28.7% | 0.37 |
 | TF-IDF + LR | 0.993 | 0.738 | 3.0% | 75.0% | 96.5% | 98.8% | 0.98 |
 | Embeddings + LR | 0.985 | 0.746 | 2.7% | 20.1% | 58.8% | 84.6% | 0.97 |
-| DeBERTa (opt.) | — | — | — | — | — | — | — |
+| DeBERTa-v3-small (fine-tuned)† | 0.996 | 0.717 | 1.5% | 72.7% | 92.2% | 91.3% | 0.98 |
 | Zero-shot LLM (qwen2.5:3b)* | 0.409 | 0.362 | 1.5% | 0.0% | 16.6% | 10.0% | 0.25 |
+
+† DeBERTa: `microsoft/deberta-v3-small`, 3 epochs, class-weighted, trained on Colab T4 on every split (full test sets). Same pattern as TF-IDF: near-perfect on Test A, but on unseen sources it flags 29–97% of genuine calls (AUC 0.79–0.90). Full table: [results/summary_deberta.md](results/summary_deberta.md).
 
 \* Zero-shot LLM: Ollama `qwen2.5:3b`, no training, run on Colab T4 on a random sample of 200 calls per test set (60 for early decision); threshold from a shared 200-call validation sample. Using its own judgement (scam probability ≥ 50) it catches 99–100% of scams but flags 32–100% of genuine calls (all of the team's genuine bank calls); its scores take only 8 distinct values, so holding FPR ≤ 2% pushes the threshold to 0.85 and recall drops to 14–28%. Full table: [results/summary_llm.md](results/summary_llm.md).
 
