@@ -1,0 +1,101 @@
+{
+ "call_id": "youtube_scam_00112",
+ "source": "youtube_scam",
+ "duration_s": 70.4,
+ "duration": "1:10",
+ "llm_model": "ollama:qwen2.5:7b",
+ "summary": "The caller claimed to be from PayPal and said there was an invoice for Christmas lights. They asked the person to download remote access software and provide a password. The call ended without the person giving any information.",
+ "live_verdict": "scam",
+ "live_reason": "Caller is asking for a password and mentioning remote access support, which are common signs of a scam.",
+ "claimed_identity": "PayPal",
+ "caller_request": "To download remote access software and provide a password",
+ "payment_method": "unknown",
+ "pressure_tactics": [
+  "you sound like you might have a cold"
+ ],
+ "llm_reasoning": "The caller asked for personal information and suggested downloading software, which are common tactics in tech support scams.",
+ "red_flags": [
+  {
+   "id": "F03",
+   "name": "Remote access app request",
+   "severity": "critical",
+   "quote": "the world's most trusted remote access oh it's remote access",
+   "timestamp_s": 51.6,
+   "chunk": 4
+  }
+ ],
+ "trust_signals": [],
+ "risk_score": 68,
+ "risk_level": "Medium",
+ "score_components": {
+  "flags": 40,
+  "llm": 20,
+  "trust": 0,
+  "classifier": 8.1,
+  "raw": 68.1
+ },
+ "likely_scam_type": "tech support / business impersonation",
+ "recommendation": "Warn, verify",
+ "confidence": "medium",
+ "score_timeline": [
+  {
+   "chunk": 0,
+   "time_s": 12.0,
+   "risk_score": 2,
+   "level": "Safe",
+   "live_verdict": "unclear",
+   "live_reason": "Not enough information to determine if it is a scam.",
+   "new_flags": []
+  },
+  {
+   "chunk": 1,
+   "time_s": 24.0,
+   "risk_score": 5,
+   "level": "Safe",
+   "live_verdict": "unclear",
+   "live_reason": "Not enough information to determine if it is a scam.",
+   "new_flags": []
+  },
+  {
+   "chunk": 2,
+   "time_s": 36.0,
+   "risk_score": 5,
+   "level": "Safe",
+   "live_verdict": "not scam",
+   "live_reason": "The caller is inquiring about a PayPal invoice for Christmas lights and does not request any personal or financial information.",
+   "new_flags": []
+  },
+  {
+   "chunk": 3,
+   "time_s": 48.0,
+   "risk_score": 6,
+   "level": "Safe",
+   "live_verdict": "unclear",
+   "live_reason": "Not enough information to determine if it is a scam.",
+   "new_flags": []
+  },
+  {
+   "chunk": 4,
+   "time_s": 60.0,
+   "risk_score": 58,
+   "level": "Medium",
+   "live_verdict": "scam",
+   "live_reason": "Caller asked to click on remote access support, which is a common scam tactic.",
+   "new_flags": [
+    "F03"
+   ]
+  },
+  {
+   "chunk": 5,
+   "time_s": 70.4,
+   "risk_score": 68,
+   "level": "Medium",
+   "live_verdict": "scam",
+   "live_reason": "Caller is asking for a password and mentioning remote access support, which are common signs of a scam.",
+   "new_flags": []
+  }
+ ],
+ "true_label": "scam",
+ "grounding_fixes": [],
+ "quotes_verified": true
+}

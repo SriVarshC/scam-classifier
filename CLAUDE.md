@@ -283,3 +283,19 @@ calls from unseen sources — need real genuine phone calls before results are m
 | Many FPs on bank/payment calls | Needs hard negatives | Generate realistic legit financial calls |
 | Zero-shot LLM ≈ trained models | Training adds little | Use LLM + rules |
 | Keyword rules ≈ ML | Data too easy/synthetic | Find harder test data |
+
+## Call analysis (src/call_analysis/, results/call_analysis/)
+- `select_calls.py` (10 demo calls, SEED 42) → `chunking.py` (~30-word chunks, 2.5 words/s, speakers
+  Caller/You) → `flags.py` (red flags F01–F25, trust T04/T06, F17 = embedding match to a generic
+  scam-script library) → `llm.py` (Ollama or OpenAI-compatible API; live scam/not-scam prediction per chunk,
+  summary after the call, `quick()` single-call mode for the service) → `scoring.py` (risk score per chunk)
+  → `report.py` → `rank.py`; `validate_rules.py` checks rule changes on held-out calls.
+- All weights live in `config/scoring.yaml`. Call it a **risk score**, never a probability.
+- Every flag needs a quote found verbatim in the transcript (`verify_quotes` fails loudly).
+- Transcripts are untrusted: delimiters + instruction-like text removed before the LLM; the LLM must answer
+  "unknown" for anything not said. Never change rules after looking at the demo calls without the user's OK,
+  and check any change on held-out calls.
+- LLM: default = largest local Ollama model that fits memory (not ≤3.5B). The Ollama server must be started
+  with `OLLAMA_MODELS=d:\HackUmass\scam-classifier\models\ollama` (models are git-ignored).
+- No dashboard (user decision). Next: a JSON microservice for the teammate's transcription API
+  (contract: POST {request_id, text} → {classes: [...], summary}; their server needs HTTPS and waits 30 s).

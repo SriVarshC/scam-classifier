@@ -1,0 +1,41 @@
+# Risk score configuration for call analysis (src/call_analysis/scoring.py).
+# The result is a RISK SCORE from 0 to 100 - it is NOT a probability.
+
+severity_weights:          # added once per distinct red flag
+  critical: 40
+  high: 25
+  medium: 10
+
+llm_judgement:             # added from the LLM's risk judgement (low / medium / high)
+  high: 20
+  medium: 10
+  low: 0
+
+trust_signal_weight: -15   # subtracted once per distinct trust signal
+
+classifier:                # embeddings + logistic regression (trained on synthetic calls only)
+  # adjustment = (classifier_fraud_score - 0.5) * scale, clipped to [-max_abs, +max_abs]
+  scale: 20
+  max_abs: 10
+
+levels:                    # lower bounds, checked from the top
+  High: 70
+  Medium: 40
+  Low: 20
+  Safe: 0
+
+recommendations:
+  High: Reject
+  Medium: Warn, verify
+  Low: Take message
+  Safe: Allow
+
+flags:
+  fuzzy_token_ratio: 0.82  # per-word similarity needed for a fuzzy match (words of 5+ letters)
+  quote_context_words: 4   # words of context kept on each side of a match in the quote
+  script_similarity: 0.60  # F17: cosine similarity to the scam-script library needed to fire
+
+llm:
+  # LIVE: predict scam / not scam every N chunks (1 chunk ~ 30 words ~ 12-15 s of speech).
+  # The summary is written only AFTER the call.
+  predict_every_chunks: 1

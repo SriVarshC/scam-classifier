@@ -1,0 +1,11 @@
+id,source,true_label,scam_type,is_synthetic,n_words,category,note
+robocall_00058,robocall,scam,F3 / gov_ssa,False,41,real scam (robocall),
+robocall_01075,robocall,scam,F3 / gov_law,False,50,real scam (robocall),
+youtube_scam_00113,youtube_scam,scam,F4 / ModderPaulScambaits,False,163,real scam (youtube),
+youtube_scam_00112,youtube_scam,scam,F4 / ModderPaulScambaits,False,176,real scam (youtube),
+synthetic_own_00149,synthetic_own,scam,F1 / otp_theft,True,81,synthetic scam: bank (F1),
+bothbosu_00139,bothbosu,scam,F3 / ssn,True,398,synthetic scam: government (F3),
+bothbosu_00440,bothbosu,scam,F4 / support,True,209,synthetic scam: tech support (F4),
+robocall_00089,robocall,genuine,F0 / benign_notice,False,16,"real genuine (robocall, rule-labelled F0)",FTC illegal-robocall dataset; labelled genuine by keyword rule - weak genuine example
+robocall_00958,robocall,genuine,F0 / home_services_telemarketing,False,15,"real genuine (robocall, rule-labelled F0)",FTC illegal-robocall dataset; labelled genuine by keyword rule - weak genuine example
+synthetic_own_00151,synthetic_own,genuine,F0 / genuine_fraud_alert,True,64,synthetic genuine: bank,

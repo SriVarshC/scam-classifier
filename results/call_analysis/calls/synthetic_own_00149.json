@@ -1,0 +1,67 @@
+{
+ "id": "synthetic_own_00149",
+ "source": "synthetic_own",
+ "true_label": "scam",
+ "scam_type": "F1 / otp_theft",
+ "is_synthetic": true,
+ "transcript": "Caller: Hi, this is Chris from Pinecrest Bank. We noticed a charge of $1,150 at an overseas website. Did you make this purchase? Recipient: No, that's not mine. Caller: We just sent a six-digit code to confirm your identity. What does it say? Recipient: It says it's to sign in to online banking. Caller: Yes, that's normal. Quickly please, the charge is about to post. Recipient: Okay, it's 656863. Caller: Thank you. I'll also need the PIN to reissue the card.",
+ "duration_s": 29.6,
+ "chunks": [
+  {
+   "index": 0,
+   "start_s": 0.0,
+   "end_s": 14.4,
+   "n_words": 36,
+   "segments": [
+    {
+     "speaker": "Caller",
+     "turn": 0,
+     "text": "Hi, this is Chris from Pinecrest Bank. We noticed a charge of $1,150 at an overseas website. Did you make this purchase?"
+    },
+    {
+     "speaker": "You",
+     "turn": 1,
+     "text": "No, that's not mine."
+    },
+    {
+     "speaker": "Caller",
+     "turn": 2,
+     "text": "We just sent a six-digit code to confirm your identity."
+    }
+   ]
+  },
+  {
+   "index": 1,
+   "start_s": 14.4,
+   "end_s": 29.6,
+   "n_words": 38,
+   "segments": [
+    {
+     "speaker": "Caller",
+     "turn": 2,
+     "text": "What does it say?"
+    },
+    {
+     "speaker": "You",
+     "turn": 3,
+     "text": "It says it's to sign in to online banking."
+    },
+    {
+     "speaker": "Caller",
+     "turn": 4,
+     "text": "Yes, that's normal. Quickly please, the charge is about to post."
+    },
+    {
+     "speaker": "You",
+     "turn": 5,
+     "text": "Okay, it's 656863."
+    },
+    {
+     "speaker": "Caller",
+     "turn": 6,
+     "text": "Thank you. I'll also need the PIN to reissue the card."
+    }
+   ]
+  }
+ ]
+}

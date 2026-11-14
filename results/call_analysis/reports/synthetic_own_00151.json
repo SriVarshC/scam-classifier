@@ -1,0 +1,59 @@
+{
+ "call_id": "synthetic_own_00151",
+ "source": "synthetic_own",
+ "duration_s": 24.0,
+ "duration": "0:24",
+ "llm_model": "ollama:qwen2.5:7b",
+ "summary": "A caller identified as Tyler from Harborview Credit Union's fraud team called to inform the person about a $750 charge at a big box store and asked if it was them. The caller blocked the card and said a new one would be mailed.",
+ "live_verdict": "not scam",
+ "live_reason": "The caller is from Harborview Credit Union and is confirming a charge, not asking for sensitive information.",
+ "claimed_identity": "Tyler from Harborview Credit Union's fraud team",
+ "caller_request": "To confirm if the $750 charge was made by the person",
+ "payment_method": "unknown",
+ "pressure_tactics": [],
+ "llm_reasoning": "The call was about a potential fraudulent charge and the credit union's actions, not a scam.",
+ "red_flags": [],
+ "trust_signals": [
+  {
+   "id": "T06",
+   "name": "No request for money, codes or personal data during the whole call",
+   "quote": "",
+   "timestamp_s": 24.0
+  }
+ ],
+ "risk_score": 0,
+ "risk_level": "Safe",
+ "score_components": {
+  "flags": 0,
+  "llm": 0,
+  "trust": -15,
+  "classifier": -2.4,
+  "raw": -17.4
+ },
+ "likely_scam_type": "not fraud",
+ "recommendation": "Allow",
+ "confidence": "high",
+ "score_timeline": [
+  {
+   "chunk": 0,
+   "time_s": 15.2,
+   "risk_score": 0,
+   "level": "Safe",
+   "live_verdict": "not scam",
+   "live_reason": "Caller is inquiring about a potential fraudulent charge.",
+   "new_flags": []
+  },
+  {
+   "chunk": 1,
+   "time_s": 24.0,
+   "risk_score": 0,
+   "level": "Safe",
+   "live_verdict": "not scam",
+   "live_reason": "The caller is from Harborview Credit Union and is confirming a charge, not asking for sensitive information.",
+   "new_flags": []
+  }
+ ],
+ "true_label": "genuine",
+ "grounding_fixes": [],
+ "quotes_verified": true
+}

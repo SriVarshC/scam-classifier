@@ -88,14 +88,33 @@ class SentenceEncoder:
 
     MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 
+    SAVE_EVERY = 500  # new vectors between saves; the rest is flushed at exit
+
     def __init__(self):
+        import atexit
+        import zipfile
         from config import PROCESSED
         self.path = PROCESSED / "emb_cache.npz"
         self.cache = {}
         if self.path.exists():
-            data = np.load(self.path)
-            self.cache = dict(zip(data["keys"], data["vecs"]))
+            try:
+                data = np.load(self.path)
+                self.cache = dict(zip(data["keys"], data["vecs"]))
+            except (zipfile.BadZipFile, OSError, ValueError, KeyError):
+                print(f"warning: embedding cache {self.path} is unreadable - rebuilding it")
         self.model = None
+        self._unsaved = 0
+        atexit.register(self.flush)
+
+    def flush(self):
+        """Atomic save: write a temp file, then replace, so an interrupted run can't corrupt the cache."""
+        import os
+        if not self._unsaved or not self.cache:
+            return
+        tmp = self.path.with_name("emb_cache.tmp.npz")
+        np.savez(tmp, keys=np.array(list(self.cache)), vecs=np.stack(list(self.cache.values())))
+        os.replace(tmp, self.path)
+        self._unsaved = 0
 
     def encode(self, texts):
         import hashlib
@@ -105,10 +124,12 @@ class SentenceEncoder:
             if self.model is None:
                 from sentence_transformers import SentenceTransformer
                 self.model = SentenceTransformer(self.MODEL_NAME, device="cpu")
-            vecs = self.model.encode([t for _, t in missing], batch_size=64, show_progress_bar=True,
-                                     normalize_embeddings=True)
+            vecs = self.model.encode([t for _, t in missing], batch_size=64,
+                                     show_progress_bar=len(missing) > 256, normalize_embeddings=True)
             self.cache.update({k: v for (k, _), v in zip(missing, vecs)})
-            np.savez(self.path, keys=np.array(list(self.cache)), vecs=np.stack(list(self.cache.values())))
+            self._unsaved += len(missing)
+            if self._unsaved >= self.SAVE_EVERY:
+                self.flush()
         return np.stack([self.cache[k] for k in keys])
 
 

@@ -1,0 +1,50 @@
+{
+ "call_id": "robocall_00089",
+ "source": "robocall",
+ "duration_s": 6.4,
+ "duration": "0:06",
+ "llm_model": "ollama:qwen2.5:7b",
+ "summary": "The caller identified themselves as conducting a test call and advised the person to stay home for safety reasons. No specific request for action or payment was made, and the call ended with the caller's message.",
+ "live_verdict": "not scam",
+ "live_reason": "The caller stated it is a test call and advised staying home, no fraud signs detected.",
+ "claimed_identity": "unknown",
+ "caller_request": "unknown",
+ "payment_method": "unknown",
+ "pressure_tactics": [],
+ "llm_reasoning": "The call was a test message with no requests for action or payment, and the advice to stay home was general and not indicative of a scam.",
+ "red_flags": [],
+ "trust_signals": [
+  {
+   "id": "T06",
+   "name": "No request for money, codes or personal data during the whole call",
+   "quote": "",
+   "timestamp_s": 6.4
+  }
+ ],
+ "risk_score": 0,
+ "risk_level": "Safe",
+ "score_components": {
+  "flags": 0,
+  "llm": 0,
+  "trust": -15,
+  "classifier": -7.4,
+  "raw": -22.4
+ },
+ "likely_scam_type": "not fraud",
+ "recommendation": "Allow",
+ "confidence": "high",
+ "score_timeline": [
+  {
+   "chunk": 0,
+   "time_s": 6.4,
+   "risk_score": 0,
+   "level": "Safe",
+   "live_verdict": "not scam",
+   "live_reason": "The caller stated it is a test call and advised staying home, no fraud signs detected.",
+   "new_flags": []
+  }
+ ],
+ "true_label": "genuine",
+ "grounding_fixes": [],
+ "quotes_verified": true
+}

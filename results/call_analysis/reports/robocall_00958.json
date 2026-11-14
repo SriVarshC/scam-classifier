@@ -1,0 +1,50 @@
+{
+ "call_id": "robocall_00958",
+ "source": "robocall",
+ "duration_s": 6.0,
+ "duration": "0:06",
+ "llm_model": "ollama:qwen2.5:7b",
+ "summary": "The caller identified themselves as Brian Lee from nationalhomeproject.com and inquired about the person's well-being. No specific request for action or payment was made, and the call ended without further details.",
+ "live_verdict": "unclear",
+ "live_reason": "The caller's intent is not clear with the information provided.",
+ "claimed_identity": "Brian Lee from nationalhomeproject.com",
+ "caller_request": "unknown",
+ "payment_method": "unknown",
+ "pressure_tactics": [],
+ "llm_reasoning": "The call was brief and did not include any requests for payment or specific actions, reducing the risk of it being a scam.",
+ "red_flags": [],
+ "trust_signals": [
+  {
+   "id": "T06",
+   "name": "No request for money, codes or personal data during the whole call",
+   "quote": "",
+   "timestamp_s": 6.0
+  }
+ ],
+ "risk_score": 0,
+ "risk_level": "Safe",
+ "score_components": {
+  "flags": 0,
+  "llm": 0,
+  "trust": -15,
+  "classifier": -5.4,
+  "raw": -20.4
+ },
+ "likely_scam_type": "unknown",
+ "recommendation": "Allow",
+ "confidence": "high",
+ "score_timeline": [
+  {
+   "chunk": 0,
+   "time_s": 6.0,
+   "risk_score": 0,
+   "level": "Safe",
+   "live_verdict": "unclear",
+   "live_reason": "The caller's intent is not clear with the information provided.",
+   "new_flags": []
+  }
+ ],
+ "true_label": "genuine",
+ "grounding_fixes": [],
+ "quotes_verified": true
+}

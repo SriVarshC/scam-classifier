@@ -1,0 +1,24 @@
+{
+ "id": "robocall_00958",
+ "source": "robocall",
+ "true_label": "genuine",
+ "scam_type": "F0 / home_services_telemarketing",
+ "is_synthetic": false,
+ "transcript": "Hi. This is Brian Lee calling on behalf of the nationalhomeproject.com. How are you today?",
+ "duration_s": 6.0,
+ "chunks": [
+  {
+   "index": 0,
+   "start_s": 0.0,
+   "end_s": 6.0,
+   "n_words": 15,
+   "segments": [
+    {
+     "speaker": "Caller",
+     "turn": 0,
+     "text": "Hi. This is Brian Lee calling on behalf of the nationalhomeproject.com. How are you today?"
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,89 @@
+{
+ "id": "youtube_scam_00113",
+ "source": "youtube_scam",
+ "true_label": "scam",
+ "scam_type": "F4 / ModderPaulScambaits",
+ "is_synthetic": false,
+ "transcript": "is this Mr yeah this is you today I'm doing pretty good how are you I'm doing very well thanks for asking um lovely lovely so you must be knowing that our company is giving you a refund of 399 which you will subscribe and this refund is being given to you because the service will not be needed in your computer anymore yeah 389 399.99 I was telling the last time we paid for Norton was back in 2004. I haven't bought Norton in a long time I'm surprised I'm being charged this is not only not this that is uh being said this is a total package that was subscribed sir and this was nothing from Norton only this was the full packet of Microsoft security powered by Norton which had anti-malware anti-spyware anti-hacking Etc programs but your computer doesn't need that eventually so eventually you are going to receive a call from us about the cancellation request we would have",
+ "duration_s": 65.2,
+ "chunks": [
+  {
+   "index": 0,
+   "start_s": 0.0,
+   "end_s": 12.0,
+   "n_words": 30,
+   "segments": [
+    {
+     "speaker": null,
+     "turn": 0,
+     "text": "is this Mr yeah this is you today I'm doing pretty good how are you I'm doing very well thanks for asking um lovely lovely so you must be knowing"
+    }
+   ]
+  },
+  {
+   "index": 1,
+   "start_s": 12.0,
+   "end_s": 24.0,
+   "n_words": 30,
+   "segments": [
+    {
+     "speaker": null,
+     "turn": 0,
+     "text": "that our company is giving you a refund of 399 which you will subscribe and this refund is being given to you because the service will not be needed in"
+    }
+   ]
+  },
+  {
+   "index": 2,
+   "start_s": 24.0,
+   "end_s": 32.0,
+   "n_words": 20,
+   "segments": [
+    {
+     "speaker": null,
+     "turn": 0,
+     "text": "your computer anymore yeah 389 399.99 I was telling the last time we paid for Norton was back in 2004."
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "start_s": 32.0,
+   "end_s": 44.0,
+   "n_words": 30,
+   "segments": [
+    {
+     "speaker": null,
+     "turn": 0,
+     "text": "I haven't bought Norton in a long time I'm surprised I'm being charged this is not only not this that is uh being said this is a total package that"
+    }
+   ]
+  },
+  {
+   "index": 4,
+   "start_s": 44.0,
+   "end_s": 56.0,
+   "n_words": 30,
+   "segments": [
+    {
+     "speaker": null,
+     "turn": 0,
+     "text": "was subscribed sir and this was nothing from Norton only this was the full packet of Microsoft security powered by Norton which had anti-malware anti-spyware anti-hacking Etc programs but your"
+    }
+   ]
+  },
+  {
+   "index": 5,
+   "start_s": 56.0,
+   "end_s": 65.2,
+   "n_words": 23,
+   "segments": [
+    {
+     "speaker": null,
+     "turn": 0,
+     "text": "computer doesn't need that eventually so eventually you are going to receive a call from us about the cancellation request we would have"
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,120 @@
+{
+ "id": "robocall_00058",
+ "source": "robocall",
+ "true_label": "scam",
+ "scam_type_true": "F3 / gov_ssa",
+ "is_synthetic": false,
+ "duration_s": 16.4,
+ "llm_model": "ollama:qwen2.5:7b",
+ "live_verdict": "unclear",
+ "live_reason": "Not enough information to determine if it is a scam.",
+ "summary": "The caller claimed to be from a legal department and informed the person that their social security number was involved in fraudulent activities. They asked the person to press 1 to connect with an officer.",
+ "extraction": {
+  "summary": "The caller claimed to be from a legal department and informed the person that their social security number was involved in fraudulent activities. They asked the person to press 1 to connect with an officer.",
+  "claimed_identity": "legal department",
+  "caller_request": "press 1 to connect with the next available officer",
+  "payment_method": "unknown",
+  "likely_scam_type": "government impersonation",
+  "reasoning": "The call involves a legal department and mentions fraudulent activities, which are common tactics in government impersonation scams.",
+  "llm_risk_judgement": "medium",
+  "pressure_tactics": [
+   "press 1 to connect with the next available officer"
+  ],
+  "grounding_fixes": [],
+  "_injection_lines_removed": 0,
+  "_llm_ok": true
+ },
+ "red_flags": [
+  {
+   "id": "F12",
+   "name": "Threats (arrest, lawsuit, frozen/suspended account, deportation)",
+   "severity": "high",
+   "quote": "that there is a legal enforcement action filed on your",
+   "chunk": 0,
+   "timestamp_s": 4.4
+  },
+  {
+   "id": "F17",
+   "name": "Matches a known scam script",
+   "severity": "high",
+   "quote": "from our department is to inform you that there is a legal enforcement action filed on your social security number for fraudulent activities.",
+   "chunk": 0,
+   "timestamp_s": 0.0,
+   "similarity": 0.724,
+   "script_no": 0
+  }
+ ],
+ "trust_signals": [],
+ "flag_occurrences": [
+  {
+   "id": "F12",
+   "name": "Threats (arrest, lawsuit, frozen/suspended account, deportation)",
+   "severity": "high",
+   "quote": "that there is a legal enforcement action filed on your",
+   "chunk": 0,
+   "timestamp_s": 4.4
+  },
+  {
+   "id": "F17",
+   "name": "Matches a known scam script",
+   "severity": "high",
+   "quote": "from our department is to inform you that there is a legal enforcement action filed on your social security number for fraudulent activities.",
+   "chunk": 0,
+   "timestamp_s": 0.0,
+   "similarity": 0.724,
+   "script_no": 0
+  }
+ ],
+ "risk_score": 59,
+ "risk_level": "Medium",
+ "score_components": {
+  "flags": 50,
+  "llm": 0,
+  "trust": 0,
+  "classifier": 9.3,
+  "raw": 59.3
+ },
+ "timeline": [
+  {
+   "chunk": 0,
+   "time_s": 9.2,
+   "score": 60,
+   "level": "Medium",
+   "components": {
+    "flags": 50,
+    "llm": 0,
+    "trust": 0,
+    "classifier": 9.6,
+    "raw": 59.6
+   },
+   "new_flags": [
+    "F12",
+    "F17"
+   ],
+   "llm_verdict": "unclear",
+   "llm_judgement": "low",
+   "llm_reason": "The call mentions a legal enforcement action but does not yet show clear fraud signs.",
+   "classifier_fraud_score": 0.982
+  },
+  {
+   "chunk": 1,
+   "time_s": 16.4,
+   "score": 59,
+   "level": "Medium",
+   "components": {
+    "flags": 50,
+    "llm": 0,
+    "trust": 0,
+    "classifier": 9.3,
+    "raw": 59.3
+   },
+   "new_flags": [],
+   "llm_verdict": "unclear",
+   "llm_judgement": "low",
+   "llm_reason": "Not enough information to determine if it is a scam.",
+   "classifier_fraud_score": 0.964
+  }
+ ],
+ "quotes_verified": true,
+ "n_quotes": 2
+}

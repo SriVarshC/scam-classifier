@@ -1,0 +1,106 @@
+{
+ "call_id": "youtube_scam_00113",
+ "source": "youtube_scam",
+ "duration_s": 65.2,
+ "duration": "1:05",
+ "llm_model": "ollama:qwen2.5:7b",
+ "summary": "The caller claimed to be from a company and said the person would receive a refund of $399.99 because the service was no longer needed. The caller did not ask for any payment or action from the person.",
+ "live_verdict": "scam",
+ "live_reason": "The caller is offering a refund for a service that the recipient is not aware of and has not subscribed to, which is a common tactic in scam calls.",
+ "claimed_identity": "unknown",
+ "caller_request": "unknown",
+ "payment_method": "unknown",
+ "pressure_tactics": [],
+ "llm_reasoning": "The call involves a refund offer and claims of past services, which are common tactics in tech support scams.",
+ "red_flags": [
+  {
+   "id": "F25",
+   "name": "Too good to be true (prize, won, refund, guaranteed)",
+   "severity": "medium",
+   "quote": "is giving you a refund of 399 which you",
+   "timestamp_s": 14.8,
+   "chunk": 1
+  }
+ ],
+ "trust_signals": [
+  {
+   "id": "T06",
+   "name": "No request for money, codes or personal data during the whole call",
+   "quote": "",
+   "timestamp_s": 65.2
+  }
+ ],
+ "risk_score": 14,
+ "risk_level": "Safe",
+ "score_components": {
+  "flags": 10,
+  "llm": 10,
+  "trust": -15,
+  "classifier": 8.7,
+  "raw": 13.7
+ },
+ "likely_scam_type": "tech support / business impersonation",
+ "recommendation": "Allow",
+ "confidence": "low",
+ "score_timeline": [
+  {
+   "chunk": 0,
+   "time_s": 12.0,
+   "risk_score": 0,
+   "level": "Safe",
+   "live_verdict": "not scam",
+   "live_reason": "The conversation so far appears to be a friendly, general exchange.",
+   "new_flags": []
+  },
+  {
+   "chunk": 1,
+   "time_s": 24.0,
+   "risk_score": 14,
+   "level": "Safe",
+   "live_verdict": "scam",
+   "live_reason": "The caller is offering a refund and suggesting subscription, which are unusual and may indicate a scam.",
+   "new_flags": [
+    "F25"
+   ]
+  },
+  {
+   "chunk": 2,
+   "time_s": 32.0,
+   "risk_score": 21,
+   "level": "Low",
+   "live_verdict": "scam",
+   "live_reason": "The caller is offering a refund for a service that was paid for in the past, which is a common tactic in refund scams.",
+   "new_flags": []
+  },
+  {
+   "chunk": 3,
+   "time_s": 44.0,
+   "risk_score": 23,
+   "level": "Low",
+   "live_verdict": "scam",
+   "live_reason": "The caller is offering a refund for a service not needed anymore, which is a common scam tactic.",
+   "new_flags": []
+  },
+  {
+   "chunk": 4,
+   "time_s": 56.0,
+   "risk_score": 28,
+   "level": "Low",
+   "live_verdict": "scam",
+   "live_reason": "The caller is offering a refund for a service that the callee is not aware of, which is a common tactic in refund scams.",
+   "new_flags": []
+  },
+  {
+   "chunk": 5,
+   "time_s": 65.2,
+   "risk_score": 29,
+   "level": "Low",
+   "live_verdict": "scam",
+   "live_reason": "The caller is offering a refund for a service that the recipient is not aware of and has not subscribed to, which is a common tactic in scam calls.",
+   "new_flags": []
+  }
+ ],
+ "true_label": "scam",
+ "grounding_fixes": [],
+ "quotes_verified": true
+}

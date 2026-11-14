@@ -1,0 +1,114 @@
+{
+ "call_id": "bothbosu_00440",
+ "source": "bothbosu",
+ "duration_s": 78.4,
+ "duration": "1:18",
+ "llm_model": "ollama:qwen2.5:7b",
+ "summary": "The caller claimed to be from Microsoft Technical Support and said the person's computer was infected with a virus. The caller asked for remote access to the computer to remove the virus and requested a one-time fee of $200, which the call ended without the person agreeing to.",
+ "live_verdict": "scam",
+ "live_reason": "Caller is asking for remote access to the user's computer and is trying to charge a fee.",
+ "claimed_identity": "Microsoft Technical Support",
+ "caller_request": "Remote access to the computer and a one-time fee of $200",
+ "payment_method": "unknown",
+ "pressure_tactics": [
+  "Our system has detected some suspicious activity on your IP address",
+  "It appears that your computer is sending out spam emails and accessing unauthorized websites"
+ ],
+ "llm_reasoning": "The caller claimed to be from Microsoft and asked for remote access, which are common tactics in tech support scams. The request for payment also indicates a potential scam.",
+ "red_flags": [
+  {
+   "id": "F17",
+   "name": "Matches a known scam script",
+   "severity": "high",
+   "quote": "Hello, this is John from Microsoft Technical Support. We've received a report that your computer is infected with a virus.",
+   "timestamp_s": 0.0,
+   "chunk": 0
+  },
+  {
+   "id": "F03",
+   "name": "Remote access app request",
+   "severity": "critical",
+   "quote": "you to give me access to your computer remotely.",
+   "timestamp_s": 56.0,
+   "chunk": 3
+  }
+ ],
+ "trust_signals": [],
+ "risk_score": 95,
+ "risk_level": "High",
+ "score_components": {
+  "flags": 65,
+  "llm": 20,
+  "trust": 0,
+  "classifier": 9.8,
+  "raw": 94.8
+ },
+ "likely_scam_type": "tech support / business impersonation",
+ "recommendation": "Reject",
+ "confidence": "high",
+ "score_timeline": [
+  {
+   "chunk": 0,
+   "time_s": 15.2,
+   "risk_score": 34,
+   "level": "Low",
+   "live_verdict": "unclear",
+   "live_reason": "Not enough information to determine if it is a scam.",
+   "new_flags": [
+    "F17"
+   ]
+  },
+  {
+   "chunk": 1,
+   "time_s": 28.8,
+   "risk_score": 44,
+   "level": "Medium",
+   "live_verdict": "scam",
+   "live_reason": "Caller claims to be from Microsoft Technical Support and mentions suspicious activity without providing evidence.",
+   "new_flags": []
+  },
+  {
+   "chunk": 2,
+   "time_s": 43.2,
+   "risk_score": 44,
+   "level": "Medium",
+   "live_verdict": "scam",
+   "live_reason": "Caller claims to be from Microsoft Technical Support and suggests the presence of a virus without providing evidence.",
+   "new_flags": []
+  },
+  {
+   "chunk": 3,
+   "time_s": 58.0,
+   "risk_score": 95,
+   "level": "High",
+   "live_verdict": "scam",
+   "live_reason": "Caller is asking for remote access to the user's computer.",
+   "new_flags": [
+    "F03"
+   ]
+  },
+  {
+   "chunk": 4,
+   "time_s": 72.0,
+   "risk_score": 95,
+   "level": "High",
+   "live_verdict": "scam",
+   "live_reason": "Caller is asking for remote access to the user's computer.",
+   "new_flags": [
+    "F03"
+   ]
+  },
+  {
+   "chunk": 5,
+   "time_s": 78.4,
+   "risk_score": 95,
+   "level": "High",
+   "live_verdict": "scam",
+   "live_reason": "Caller is asking for remote access to the user's computer and is trying to charge a fee.",
+   "new_flags": []
+  }
+ ],
+ "true_label": "scam",
+ "grounding_fixes": [],
+ "quotes_verified": true
+}

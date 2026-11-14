@@ -1,0 +1,68 @@
+{
+ "id": "robocall_00089",
+ "source": "robocall",
+ "true_label": "genuine",
+ "scam_type_true": "F0 / benign_notice",
+ "is_synthetic": false,
+ "duration_s": 6.4,
+ "llm_model": "ollama:qwen2.5:7b",
+ "live_verdict": "not scam",
+ "live_reason": "The caller stated it is a test call and advised staying home, no fraud signs detected.",
+ "summary": "The caller identified themselves as conducting a test call and advised the person to stay home for safety reasons. No specific request for action or payment was made, and the call ended with the caller's message.",
+ "extraction": {
+  "summary": "The caller identified themselves as conducting a test call and advised the person to stay home for safety reasons. No specific request for action or payment was made, and the call ended with the caller's message.",
+  "claimed_identity": "unknown",
+  "caller_request": "unknown",
+  "payment_method": "unknown",
+  "likely_scam_type": "not fraud",
+  "reasoning": "The call was a test message with no requests for action or payment, and the advice to stay home was general and not indicative of a scam.",
+  "llm_risk_judgement": "low",
+  "pressure_tactics": [],
+  "grounding_fixes": [],
+  "_injection_lines_removed": 0,
+  "_llm_ok": true
+ },
+ "red_flags": [],
+ "trust_signals": [
+  {
+   "id": "T06",
+   "name": "No request for money, codes or personal data during the whole call",
+   "severity": "trust",
+   "quote": "",
+   "chunk": 0,
+   "timestamp_s": 6.4
+  }
+ ],
+ "flag_occurrences": [],
+ "risk_score": 0,
+ "risk_level": "Safe",
+ "score_components": {
+  "flags": 0,
+  "llm": 0,
+  "trust": -15,
+  "classifier": -7.4,
+  "raw": -22.4
+ },
+ "timeline": [
+  {
+   "chunk": 0,
+   "time_s": 6.4,
+   "score": 0,
+   "level": "Safe",
+   "components": {
+    "flags": 0,
+    "llm": 0,
+    "trust": 0,
+    "classifier": -7.4,
+    "raw": -7.4
+   },
+   "new_flags": [],
+   "llm_verdict": "not scam",
+   "llm_judgement": "low",
+   "llm_reason": "The caller stated it is a test call and advised staying home, no fraud signs detected.",
+   "classifier_fraud_score": 0.132
+  }
+ ],
+ "quotes_verified": true,
+ "n_quotes": 0
+}

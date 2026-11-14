@@ -1,0 +1,120 @@
+{
+ "id": "robocall_01075",
+ "source": "robocall",
+ "true_label": "scam",
+ "scam_type_true": "F3 / gov_law",
+ "is_synthetic": false,
+ "duration_s": 20.0,
+ "llm_model": "ollama:qwen2.5:7b",
+ "live_verdict": "scam",
+ "live_reason": "Caller threatens legal consequences and asks to press a number to speak with an investigation officer.",
+ "summary": "The caller claimed to be from customs and border protection, stating that a package with contraband was seized under the person's name. They instructed the person to press one to speak with an investigation officer to avoid legal consequences.",
+ "extraction": {
+  "summary": "The caller claimed to be from customs and border protection, stating that a package with contraband was seized under the person's name. They instructed the person to press one to speak with an investigation officer to avoid legal consequences.",
+  "claimed_identity": "customs and border protection",
+  "caller_request": "to press one to talk to an investigation officer",
+  "payment_method": "unknown",
+  "likely_scam_type": "government impersonation",
+  "reasoning": "The call involves a government agency and an attempt to avoid legal consequences, which are common tactics in government impersonation scams.",
+  "llm_risk_judgement": "medium",
+  "pressure_tactics": [
+   "press one to talk to an investigation officer"
+  ],
+  "grounding_fixes": [],
+  "_injection_lines_removed": 0,
+  "_llm_ok": true
+ },
+ "red_flags": [
+  {
+   "id": "F12",
+   "name": "Threats (arrest, lawsuit, frozen/suspended account, deportation)",
+   "severity": "high",
+   "quote": "a package has been seized under your name by",
+   "chunk": 0,
+   "timestamp_s": 5.6
+  },
+  {
+   "id": "F17",
+   "name": "Matches a known scam script",
+   "severity": "high",
+   "quote": "The reason of this call is to inform you about a package has been seized under your name by us customs and border protection with contraband of drugs and cash.",
+   "chunk": 0,
+   "timestamp_s": 0.0,
+   "similarity": 0.828,
+   "script_no": 10
+  }
+ ],
+ "trust_signals": [],
+ "flag_occurrences": [
+  {
+   "id": "F12",
+   "name": "Threats (arrest, lawsuit, frozen/suspended account, deportation)",
+   "severity": "high",
+   "quote": "a package has been seized under your name by",
+   "chunk": 0,
+   "timestamp_s": 5.6
+  },
+  {
+   "id": "F17",
+   "name": "Matches a known scam script",
+   "severity": "high",
+   "quote": "The reason of this call is to inform you about a package has been seized under your name by us customs and border protection with contraband of drugs and cash.",
+   "chunk": 0,
+   "timestamp_s": 0.0,
+   "similarity": 0.828,
+   "script_no": 10
+  }
+ ],
+ "risk_score": 76,
+ "risk_level": "High",
+ "score_components": {
+  "flags": 50,
+  "llm": 20,
+  "trust": 0,
+  "classifier": 6.4,
+  "raw": 76.4
+ },
+ "timeline": [
+  {
+   "chunk": 0,
+   "time_s": 12.0,
+   "score": 77,
+   "level": "High",
+   "components": {
+    "flags": 50,
+    "llm": 20,
+    "trust": 0,
+    "classifier": 7.2,
+    "raw": 77.2
+   },
+   "new_flags": [
+    "F12",
+    "F17"
+   ],
+   "llm_verdict": "scam",
+   "llm_judgement": "high",
+   "llm_reason": "The caller claims to have seized a package with contraband, which is a common scam tactic.",
+   "classifier_fraud_score": 0.861
+  },
+  {
+   "chunk": 1,
+   "time_s": 20.0,
+   "score": 76,
+   "level": "High",
+   "components": {
+    "flags": 50,
+    "llm": 20,
+    "trust": 0,
+    "classifier": 6.4,
+    "raw": 76.4
+   },
+   "new_flags": [],
+   "llm_verdict": "scam",
+   "llm_judgement": "high",
+   "llm_reason": "Caller threatens legal consequences and asks to press a number to speak with an investigation officer.",
+   "classifier_fraud_score": 0.821
+  }
+ ],
+ "quotes_verified": true,
+ "n_quotes": 2
+}

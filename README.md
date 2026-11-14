@@ -120,3 +120,53 @@ Early-decision = Test A recall using only the first 50 words. Full details:
 Anatomy of a Scam Call corpus, then re-run `python src/run_experiment.py && python src/analyze.py`.
 
 </details>
+
+## Call analysis (live scam detection demo)
+For each phone call: a simulated live transcript (~30-word chunks ≈ 12–15 s of speech), red-flag rules with
+exact evidence quotes, an LLM scam / not-scam prediction every chunk, a live **risk score** (0–100, not a
+probability), and after the call a plain-language summary plus a report. Code: `src/call_analysis/`,
+weights: `config/scoring.yaml`, outputs: `results/call_analysis/`. No dashboard — the output is JSON (a JSON
+microservice for the team's audio-transcription server is the next step).
+
+```bash
+# needs a local Ollama server with qwen2.5:7b (auto-picked as the largest local model that fits memory)
+python src/call_analysis/select_calls.py   # pick the 10 demo calls (SEED 42)
+python src/call_analysis/chunking.py       # simulate live streaming
+python src/call_analysis/scoring.py        # flags + live LLM prediction + risk score per chunk + summary
+python src/call_analysis/report.py         # reports/<call_id>.json and .md
+python src/call_analysis/rank.py           # ranking.csv/.md + evaluation.md
+python src/call_analysis/validate_rules.py # rule check on held-out calls
+```
+
+Risk score = red flags (critical 40 / high 25 / medium 10, each counted once) + live LLM judgement
+(high +20 / medium +10) − 15 per trust signal + classifier adjustment (±10). High ≥ 70 → Reject,
+Medium 40–69 → Warn, verify, Low 20–39 → Take message, Safe < 20 → Allow.
+
+**Ranking of the 10 demo calls** (LLM `qwen2.5:7b`, rules v2):
+
+| Rank | Call | Risk score | Level | Recommendation | Live LLM verdict | True |
+|---|---|---|---|---|---|---|
+| 1 | bothbosu_00440 | 95 | High | Reject | scam | scam |
+| 2 | bothbosu_00139 | 90 | High | Reject | scam | scam |
+| 3 | synthetic_own_00149 | 79 | High | Reject | scam | scam |
+| 4 | robocall_01075 | 76 | High | Reject | scam | scam |
+| 5 | youtube_scam_00112 | 68 | Medium | Warn, verify | scam | scam |
+| 6 | robocall_00058 | 59 | Medium | Warn, verify | unclear | scam |
+| 7 | youtube_scam_00113 | 14 | Safe | Allow | scam | scam |
+| 8 | robocall_00089 | 0 | Safe | Allow | not scam | genuine |
+| 9 | robocall_00958 | 0 | Safe | Allow | unclear | genuine |
+| 10 | synthetic_own_00151 | 0 | Safe | Allow | not scam | genuine |
+
+**Findings (honest):**
+- All scams rank above all genuine calls, the top 3 are scams, no genuine call is High, and 13/13 evidence
+  quotes are verified verbatim. 4 of 7 scams reach High (earliest at 0:12).
+- `youtube_scam_00113` (refund scam clip) is rated Safe even though the live LLM says "scam": the LLM only
+  adds +10 at "medium" and the clip ends before any request, so T06 (−15) applies.
+- **10 calls is a demo, not proof of accuracy.** The two "real genuine" calls are 15-word robocalls from an
+  FTC illegal-robocall dataset that a keyword rule labelled genuine; the others are synthetic.
+- **Not a blind test:** four rule changes were made after the first run (user-approved) and checked on
+  held-out calls (`results/call_analysis/rule_validation.md`: OTP-theft scams caught 44% → 78%).
+- Known problem (held-out): 17% of genuine synthetic bank calls trigger the critical F01 flag
+  ("we will never ask for your PIN", "I'm sending you a code") — negation handling is not implemented.
+- LLM summaries can omit details (one says no payment info was given although the caller got the code);
+  the flags and quotes are the verifiable evidence.

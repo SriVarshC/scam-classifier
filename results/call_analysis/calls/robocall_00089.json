@@ -1,0 +1,24 @@
+{
+ "id": "robocall_00089",
+ "source": "robocall",
+ "true_label": "genuine",
+ "scam_type": "F0 / benign_notice",
+ "is_synthetic": false,
+ "transcript": "Hello. This is just a test call. Time to stay home. Stay safe and stay home.",
+ "duration_s": 6.4,
+ "chunks": [
+  {
+   "index": 0,
+   "start_s": 0.0,
+   "end_s": 6.4,
+   "n_words": 16,
+   "segments": [
+    {
+     "speaker": "Caller",
+     "turn": 0,
+     "text": "Hello. This is just a test call. Time to stay home. Stay safe and stay home."
+    }
+   ]
+  }
+ ]
+}

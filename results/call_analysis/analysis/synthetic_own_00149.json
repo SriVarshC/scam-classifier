@@ -1,0 +1,126 @@
+{
+ "id": "synthetic_own_00149",
+ "source": "synthetic_own",
+ "true_label": "scam",
+ "scam_type_true": "F1 / otp_theft",
+ "is_synthetic": true,
+ "duration_s": 29.6,
+ "llm_model": "ollama:qwen2.5:7b",
+ "live_verdict": "scam",
+ "live_reason": "Caller asked for PIN to reissue the card, which is a clear fraud sign.",
+ "summary": "A caller claiming to be from Pinecrest Bank called to verify a suspicious charge of $1,150. The caller asked for a six-digit code for online banking and a PIN to reissue a card. The call ended without the person giving any payment information.",
+ "extraction": {
+  "summary": "A caller claiming to be from Pinecrest Bank called to verify a suspicious charge of $1,150. The caller asked for a six-digit code for online banking and a PIN to reissue a card. The call ended without the person giving any payment information.",
+  "claimed_identity": "Pinecrest Bank",
+  "caller_request": "To verify a suspicious charge and reissue a card",
+  "payment_method": "unknown",
+  "likely_scam_type": "financial impersonation",
+  "reasoning": "The caller claimed to be from a bank and asked for sensitive information, which are common tactics in financial impersonation scams.",
+  "llm_risk_judgement": "medium",
+  "pressure_tactics": [
+   "the charge is about to post"
+  ],
+  "grounding_fixes": [],
+  "_injection_lines_removed": 0,
+  "_llm_ok": true
+ },
+ "red_flags": [
+  {
+   "id": "F01",
+   "name": "Asks for one-time code / PIN / password",
+   "severity": "critical",
+   "quote": "We just sent a six-digit code to confirm your identity.",
+   "chunk": 0,
+   "timestamp_s": 11.2
+  },
+  {
+   "id": "F20",
+   "name": "Urgency",
+   "severity": "medium",
+   "quote": "Yes, that's normal. Quickly please, the charge is",
+   "chunk": 1,
+   "timestamp_s": 20.8
+  }
+ ],
+ "trust_signals": [],
+ "flag_occurrences": [
+  {
+   "id": "F01",
+   "name": "Asks for one-time code / PIN / password",
+   "severity": "critical",
+   "quote": "We just sent a six-digit code to confirm your identity.",
+   "chunk": 0,
+   "timestamp_s": 11.2
+  },
+  {
+   "id": "F01",
+   "name": "Asks for one-time code / PIN / password",
+   "severity": "critical",
+   "quote": "Thank you. I'll also need the PIN to reissue the card.",
+   "chunk": 1,
+   "timestamp_s": 26.8
+  },
+  {
+   "id": "F20",
+   "name": "Urgency",
+   "severity": "medium",
+   "quote": "Yes, that's normal. Quickly please, the charge is",
+   "chunk": 1,
+   "timestamp_s": 20.8
+  }
+ ],
+ "risk_score": 79,
+ "risk_level": "High",
+ "score_components": {
+  "flags": 50,
+  "llm": 20,
+  "trust": 0,
+  "classifier": 9.0,
+  "raw": 79.0
+ },
+ "timeline": [
+  {
+   "chunk": 0,
+   "time_s": 14.4,
+   "score": 59,
+   "level": "Medium",
+   "components": {
+    "flags": 40,
+    "llm": 10,
+    "trust": 0,
+    "classifier": 9.1,
+    "raw": 59.1
+   },
+   "new_flags": [
+    "F01"
+   ],
+   "llm_verdict": "scam",
+   "llm_judgement": "medium",
+   "llm_reason": "The caller is asking for a six-digit code to confirm identity, which is a common fraud tactic.",
+   "classifier_fraud_score": 0.957
+  },
+  {
+   "chunk": 1,
+   "time_s": 29.6,
+   "score": 79,
+   "level": "High",
+   "components": {
+    "flags": 50,
+    "llm": 20,
+    "trust": 0,
+    "classifier": 9.0,
+    "raw": 79.0
+   },
+   "new_flags": [
+    "F01",
+    "F20"
+   ],
+   "llm_verdict": "scam",
+   "llm_judgement": "high",
+   "llm_reason": "Caller asked for PIN to reissue the card, which is a clear fraud sign.",
+   "classifier_fraud_score": 0.948
+  }
+ ],
+ "quotes_verified": true,
+ "n_quotes": 3
+}

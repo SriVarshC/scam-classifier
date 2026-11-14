@@ -1,0 +1,76 @@
+{
+ "call_id": "synthetic_own_00149",
+ "source": "synthetic_own",
+ "duration_s": 29.6,
+ "duration": "0:29",
+ "llm_model": "ollama:qwen2.5:7b",
+ "summary": "A caller claiming to be from Pinecrest Bank called to verify a suspicious charge of $1,150. The caller asked for a six-digit code for online banking and a PIN to reissue a card. The call ended without the person giving any payment information.",
+ "live_verdict": "scam",
+ "live_reason": "Caller asked for PIN to reissue the card, which is a clear fraud sign.",
+ "claimed_identity": "Pinecrest Bank",
+ "caller_request": "To verify a suspicious charge and reissue a card",
+ "payment_method": "unknown",
+ "pressure_tactics": [
+  "the charge is about to post"
+ ],
+ "llm_reasoning": "The caller claimed to be from a bank and asked for sensitive information, which are common tactics in financial impersonation scams.",
+ "red_flags": [
+  {
+   "id": "F01",
+   "name": "Asks for one-time code / PIN / password",
+   "severity": "critical",
+   "quote": "We just sent a six-digit code to confirm your identity.",
+   "timestamp_s": 11.2,
+   "chunk": 0
+  },
+  {
+   "id": "F20",
+   "name": "Urgency",
+   "severity": "medium",
+   "quote": "Yes, that's normal. Quickly please, the charge is",
+   "timestamp_s": 20.8,
+   "chunk": 1
+  }
+ ],
+ "trust_signals": [],
+ "risk_score": 79,
+ "risk_level": "High",
+ "score_components": {
+  "flags": 50,
+  "llm": 20,
+  "trust": 0,
+  "classifier": 9.0,
+  "raw": 79.0
+ },
+ "likely_scam_type": "financial impersonation",
+ "recommendation": "Reject",
+ "confidence": "high",
+ "score_timeline": [
+  {
+   "chunk": 0,
+   "time_s": 14.4,
+   "risk_score": 59,
+   "level": "Medium",
+   "live_verdict": "scam",
+   "live_reason": "The caller is asking for a six-digit code to confirm identity, which is a common fraud tactic.",
+   "new_flags": [
+    "F01"
+   ]
+  },
+  {
+   "chunk": 1,
+   "time_s": 29.6,
+   "risk_score": 79,
+   "level": "High",
+   "live_verdict": "scam",
+   "live_reason": "Caller asked for PIN to reissue the card, which is a clear fraud sign.",
+   "new_flags": [
+    "F01",
+    "F20"
+   ]
+  }
+ ],
+ "true_label": "scam",
+ "grounding_fixes": [],
+ "quotes_verified": true
+}

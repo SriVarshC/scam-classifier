@@ -1,0 +1,124 @@
+{
+ "id": "bothbosu_00440",
+ "source": "bothbosu",
+ "true_label": "scam",
+ "scam_type": "F4 / support",
+ "is_synthetic": true,
+ "transcript": "caller: Hello, this is John from Microsoft Technical Support. We've received a report that your computer is infected with a virus. receiver: Oh, really? What makes you think that? caller: Our system has detected some suspicious activity on your IP address. receiver: That's strange. I haven't noticed anything out of the ordinary. Can you tell me more about this suspicious activity? caller: Well, it appears that your computer is sending out spam emails and accessing unauthorized websites. receiver: I'm not sure how that's possible. I only use my computer for browsing and checking email. caller: That's exactly what these viruses do - they hide in the background and cause harm without you even realizing it. receiver: Okay, so what can you do to help me fix this problem? caller: I can walk you through a few steps to remove the virus, but first, I need you to give me access to your computer remotely. receiver: How do you plan to do that? caller: I'll guide you through the process of downloading a remote desktop software, and then I'll take care of the rest. receiver: And how much will this service cost me? caller: It's a one-time fee of $200, which is a special discounted rate for our valued customers.",
+ "duration_s": 78.4,
+ "chunks": [
+  {
+   "index": 0,
+   "start_s": 0.0,
+   "end_s": 15.2,
+   "n_words": 38,
+   "segments": [
+    {
+     "speaker": "Caller",
+     "turn": 0,
+     "text": "Hello, this is John from Microsoft Technical Support. We've received a report that your computer is infected with a virus."
+    },
+    {
+     "speaker": "You",
+     "turn": 1,
+     "text": "Oh, really? What makes you think that?"
+    },
+    {
+     "speaker": "Caller",
+     "turn": 2,
+     "text": "Our system has detected some suspicious activity on your IP address."
+    }
+   ]
+  },
+  {
+   "index": 1,
+   "start_s": 15.2,
+   "end_s": 28.8,
+   "n_words": 34,
+   "segments": [
+    {
+     "speaker": "You",
+     "turn": 3,
+     "text": "That's strange. I haven't noticed anything out of the ordinary. Can you tell me more about this suspicious activity?"
+    },
+    {
+     "speaker": "Caller",
+     "turn": 4,
+     "text": "Well, it appears that your computer is sending out spam emails and accessing unauthorized websites."
+    }
+   ]
+  },
+  {
+   "index": 2,
+   "start_s": 28.8,
+   "end_s": 43.2,
+   "n_words": 36,
+   "segments": [
+    {
+     "speaker": "You",
+     "turn": 5,
+     "text": "I'm not sure how that's possible. I only use my computer for browsing and checking email."
+    },
+    {
+     "speaker": "Caller",
+     "turn": 6,
+     "text": "That's exactly what these viruses do - they hide in the background and cause harm without you even realizing it."
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "start_s": 43.2,
+   "end_s": 58.0,
+   "n_words": 37,
+   "segments": [
+    {
+     "speaker": "You",
+     "turn": 7,
+     "text": "Okay, so what can you do to help me fix this problem?"
+    },
+    {
+     "speaker": "Caller",
+     "turn": 8,
+     "text": "I can walk you through a few steps to remove the virus, but first, I need you to give me access to your computer remotely."
+    }
+   ]
+  },
+  {
+   "index": 4,
+   "start_s": 58.0,
+   "end_s": 72.0,
+   "n_words": 35,
+   "segments": [
+    {
+     "speaker": "You",
+     "turn": 9,
+     "text": "How do you plan to do that?"
+    },
+    {
+     "speaker": "Caller",
+     "turn": 10,
+     "text": "I'll guide you through the process of downloading a remote desktop software, and then I'll take care of the rest."
+    },
+    {
+     "speaker": "You",
+     "turn": 11,
+     "text": "And how much will this service cost me?"
+    }
+   ]
+  },
+  {
+   "index": 5,
+   "start_s": 72.0,
+   "end_s": 78.4,
+   "n_words": 16,
+   "segments": [
+    {
+     "speaker": "Caller",
+     "turn": 12,
+     "text": "It's a one-time fee of $200, which is a special discounted rate for our valued customers."
+    }
+   ]
+  }
+ ]
+}

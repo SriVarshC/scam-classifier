@@ -31,3 +31,6 @@ Thumbs.db
 colab_bundle.zip
 llm_results.zip
 deberta_results.zip
+
+# Call analysis LLM answer cache (prompts contain transcripts; regenerate locally)
+results/call_analysis/cache/

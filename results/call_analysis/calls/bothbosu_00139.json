@@ -1,0 +1,217 @@
+{
+ "id": "bothbosu_00139",
+ "source": "bothbosu",
+ "true_label": "scam",
+ "scam_type": "F3 / ssn",
+ "is_synthetic": true,
+ "transcript": "caller: Hello, my name is Officer Johnson from the Social Security Administration. We've received a report that your social security number has been compromised and is being used for fraudulent activities. receiver: Oh no, that sounds serious. Can you tell me more about what's going on? caller: Yes, of course. Our system shows that your social security number has been linked to several suspicious transactions. We need to verify your information to ensure your identity and protect your benefits. receiver: That makes sense. But how did you get my phone number? Is it connected to my social security account? caller: Ah, yes. We have access to all sorts of databases and records. We can track down anyone's contact information if we need to. receiver: I see. So, what exactly do you need from me to verify my information? caller: We just need you to confirm your social security number and date of birth. Then we can proceed with the investigation. receiver: Okay... but can you give me your badge number or some kind of identification so I know you're really from the SSA? caller: Uh, let me check on that real quick. Okay, my badge number is 847523. receiver: Okay, I'll make a note of that. But before I give you any information, can you tell me more about these suspicious transactions? What kind of activities are they related to? caller: Well, it seems like someone has been using your social security number to open up credit cards and take out loans in your name. receiver: That's terrible! Do you know who's behind it or where it's happening? caller: We're still investigating, but we think it might be a group of scammers based in Nigeria. receiver: Nigeria? That's a long way from here. How did they even get my information? caller: We're not entirely sure yet, but we're working on tracing their digital footprint. receiver: Okay, I think I understand. But before I give you my social security number, can you just confirm one more thing for me? Is there a fee associated with this investigation or will it be covered by the SSA? caller: Ah, yes... there is a small processing fee of $200 that needs to be paid upfront. But don't worry, it's completely refundable once the investigation is complete. receiver: Hmm, I'm not sure I'm comfortable with that. Can I speak to your supervisor instead?",
+ "duration_s": 152.0,
+ "chunks": [
+  {
+   "index": 0,
+   "start_s": 0.0,
+   "end_s": 12.0,
+   "n_words": 30,
+   "segments": [
+    {
+     "speaker": "Caller",
+     "turn": 0,
+     "text": "Hello, my name is Officer Johnson from the Social Security Administration. We've received a report that your social security number has been compromised and is being used for fraudulent activities."
+    }
+   ]
+  },
+  {
+   "index": 1,
+   "start_s": 12.0,
+   "end_s": 24.8,
+   "n_words": 32,
+   "segments": [
+    {
+     "speaker": "You",
+     "turn": 1,
+     "text": "Oh no, that sounds serious. Can you tell me more about what's going on?"
+    },
+    {
+     "speaker": "Caller",
+     "turn": 2,
+     "text": "Yes, of course. Our system shows that your social security number has been linked to several suspicious transactions."
+    }
+   ]
+  },
+  {
+   "index": 2,
+   "start_s": 24.8,
+   "end_s": 38.0,
+   "n_words": 33,
+   "segments": [
+    {
+     "speaker": "Caller",
+     "turn": 2,
+     "text": "We need to verify your information to ensure your identity and protect your benefits."
+    },
+    {
+     "speaker": "You",
+     "turn": 3,
+     "text": "That makes sense. But how did you get my phone number? Is it connected to my social security account?"
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "start_s": 38.0,
+   "end_s": 52.8,
+   "n_words": 37,
+   "segments": [
+    {
+     "speaker": "Caller",
+     "turn": 4,
+     "text": "Ah, yes. We have access to all sorts of databases and records. We can track down anyone's contact information if we need to."
+    },
+    {
+     "speaker": "You",
+     "turn": 5,
+     "text": "I see. So, what exactly do you need from me to verify my information?"
+    }
+   ]
+  },
+  {
+   "index": 4,
+   "start_s": 52.8,
+   "end_s": 61.6,
+   "n_words": 22,
+   "segments": [
+    {
+     "speaker": "Caller",
+     "turn": 6,
+     "text": "We just need you to confirm your social security number and date of birth. Then we can proceed with the investigation."
+    },
+    {
+     "speaker": "You",
+     "turn": 7,
+     "text": "Okay..."
+    }
+   ]
+  },
+  {
+   "index": 5,
+   "start_s": 61.6,
+   "end_s": 75.6,
+   "n_words": 35,
+   "segments": [
+    {
+     "speaker": "You",
+     "turn": 7,
+     "text": "but can you give me your badge number or some kind of identification so I know you're really from the SSA?"
+    },
+    {
+     "speaker": "Caller",
+     "turn": 8,
+     "text": "Uh, let me check on that real quick. Okay, my badge number is 847523."
+    }
+   ]
+  },
+  {
+   "index": 6,
+   "start_s": 75.6,
+   "end_s": 88.0,
+   "n_words": 31,
+   "segments": [
+    {
+     "speaker": "You",
+     "turn": 9,
+     "text": "Okay, I'll make a note of that. But before I give you any information, can you tell me more about these suspicious transactions? What kind of activities are they related to?"
+    }
+   ]
+  },
+  {
+   "index": 7,
+   "start_s": 88.0,
+   "end_s": 102.4,
+   "n_words": 36,
+   "segments": [
+    {
+     "speaker": "Caller",
+     "turn": 10,
+     "text": "Well, it seems like someone has been using your social security number to open up credit cards and take out loans in your name."
+    },
+    {
+     "speaker": "You",
+     "turn": 11,
+     "text": "That's terrible! Do you know who's behind it or where it's happening?"
+    }
+   ]
+  },
+  {
+   "index": 8,
+   "start_s": 102.4,
+   "end_s": 114.4,
+   "n_words": 30,
+   "segments": [
+    {
+     "speaker": "Caller",
+     "turn": 12,
+     "text": "We're still investigating, but we think it might be a group of scammers based in Nigeria."
+    },
+    {
+     "speaker": "You",
+     "turn": 13,
+     "text": "Nigeria? That's a long way from here. How did they even get my information?"
+    }
+   ]
+  },
+  {
+   "index": 9,
+   "start_s": 114.4,
+   "end_s": 128.8,
+   "n_words": 36,
+   "segments": [
+    {
+     "speaker": "Caller",
+     "turn": 14,
+     "text": "We're not entirely sure yet, but we're working on tracing their digital footprint."
+    },
+    {
+     "speaker": "You",
+     "turn": 15,
+     "text": "Okay, I think I understand. But before I give you my social security number, can you just confirm one more thing for me?"
+    }
+   ]
+  },
+  {
+   "index": 10,
+   "start_s": 128.8,
+   "end_s": 141.6,
+   "n_words": 32,
+   "segments": [
+    {
+     "speaker": "You",
+     "turn": 15,
+     "text": "Is there a fee associated with this investigation or will it be covered by the SSA?"
+    },
+    {
+     "speaker": "Caller",
+     "turn": 16,
+     "text": "Ah, yes... there is a small processing fee of $200 that needs to be paid upfront."
+    }
+   ]
+  },
+  {
+   "index": 11,
+   "start_s": 141.6,
+   "end_s": 152.0,
+   "n_words": 26,
+   "segments": [
+    {
+     "speaker": "Caller",
+     "turn": 16,
+     "text": "But don't worry, it's completely refundable once the investigation is complete."
+    },
+    {
+     "speaker": "You",
+     "turn": 17,
+     "text": "Hmm, I'm not sure I'm comfortable with that. Can I speak to your supervisor instead?"
+    }
+   ]
+  }
+ ]
+}

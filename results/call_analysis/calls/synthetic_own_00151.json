@@ -1,0 +1,47 @@
+{
+ "id": "synthetic_own_00151",
+ "source": "synthetic_own",
+ "true_label": "genuine",
+ "scam_type": "F0 / genuine_fraud_alert",
+ "is_synthetic": true,
+ "transcript": "Agent: hi this is tyler from harborview credit union's fraud team i'm calling so about a okay on your debit card Agent: we saw a charge $750 at a big box store can you confirm if uh that was you Customer: yes that was me Agent: thank you we've blocked the card and a new one will be mailed to the address on file",
+ "duration_s": 24.0,
+ "chunks": [
+  {
+   "index": 0,
+   "start_s": 0.0,
+   "end_s": 15.2,
+   "n_words": 38,
+   "segments": [
+    {
+     "speaker": "Caller",
+     "turn": 0,
+     "text": "hi this is tyler from harborview credit union's fraud team i'm calling so about a okay on your debit card"
+    },
+    {
+     "speaker": "Caller",
+     "turn": 1,
+     "text": "we saw a charge $750 at a big box store can you confirm if uh that was you"
+    }
+   ]
+  },
+  {
+   "index": 1,
+   "start_s": 15.2,
+   "end_s": 24.0,
+   "n_words": 22,
+   "segments": [
+    {
+     "speaker": "You",
+     "turn": 2,
+     "text": "yes that was me"
+    },
+    {
+     "speaker": "Caller",
+     "turn": 3,
+     "text": "thank you we've blocked the card and a new one will be mailed to the address on file"
+    }
+   ]
+  }
+ ]
+}

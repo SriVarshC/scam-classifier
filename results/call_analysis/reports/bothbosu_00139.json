@@ -1,0 +1,176 @@
+{
+ "call_id": "bothbosu_00139",
+ "source": "bothbosu",
+ "duration_s": 152.0,
+ "duration": "2:32",
+ "llm_model": "ollama:qwen2.5:7b",
+ "summary": "The caller identified themselves as Officer Johnson from the Social Security Administration and informed the person that their social security number had been compromised. They asked for the person's social security number and date of birth to verify their identity. The caller mentioned a processing fee of $200, which was refundable after the investigation. The call ended with the person requesting to speak with a supervisor.",
+ "live_verdict": "scam",
+ "live_reason": "The caller asked for personal information and mentioned a processing fee.",
+ "claimed_identity": "Officer Johnson from the Social Security Administration",
+ "caller_request": "To confirm the person's social security number and date of birth, and to pay a processing fee of $200",
+ "payment_method": "unknown",
+ "pressure_tactics": [
+  "We have access to all sorts of databases and records.",
+  "We're still investigating, but we think it might be a group of scammers based in Nigeria."
+ ],
+ "llm_reasoning": "The caller claimed to be from the Social Security Administration and asked for personal information, which are common tactics in government impersonation scams. The mention of a processing fee adds to the risk.",
+ "red_flags": [
+  {
+   "id": "F17",
+   "name": "Matches a known scam script",
+   "severity": "high",
+   "quote": "Hello, my name is Officer Johnson from the Social Security Administration. We've received a report that your social security number has been compromised and is being used for fraudulent activities.",
+   "timestamp_s": 0.0,
+   "chunk": 0
+  },
+  {
+   "id": "F14",
+   "name": "Asks for SSN / full card number / account number",
+   "severity": "high",
+   "quote": "just need you to confirm your social security number and date of",
+   "timestamp_s": 54.8,
+   "chunk": 4
+  },
+  {
+   "id": "F20",
+   "name": "Urgency",
+   "severity": "medium",
+   "quote": "check on that real quick. Okay, my badge number",
+   "timestamp_s": 72.8,
+   "chunk": 5
+  }
+ ],
+ "trust_signals": [],
+ "risk_score": 90,
+ "risk_level": "High",
+ "score_components": {
+  "flags": 60,
+  "llm": 20,
+  "trust": 0,
+  "classifier": 9.9,
+  "raw": 89.9
+ },
+ "likely_scam_type": "government impersonation",
+ "recommendation": "Reject",
+ "confidence": "high",
+ "score_timeline": [
+  {
+   "chunk": 0,
+   "time_s": 12.0,
+   "risk_score": 34,
+   "level": "Low",
+   "live_verdict": "unclear",
+   "live_reason": "The caller claims to be from the Social Security Administration but has not yet requested any personal information.",
+   "new_flags": [
+    "F17"
+   ]
+  },
+  {
+   "chunk": 1,
+   "time_s": 24.8,
+   "risk_score": 34,
+   "level": "Low",
+   "live_verdict": "unclear",
+   "live_reason": "Not enough information to determine if it is a scam.",
+   "new_flags": []
+  },
+  {
+   "chunk": 2,
+   "time_s": 38.0,
+   "risk_score": 33,
+   "level": "Low",
+   "live_verdict": "not scam",
+   "live_reason": "The caller is verifying information to protect the recipient's identity and benefits.",
+   "new_flags": []
+  },
+  {
+   "chunk": 3,
+   "time_s": 52.8,
+   "risk_score": 34,
+   "level": "Low",
+   "live_verdict": "unclear",
+   "live_reason": "Not enough information to determine if it is a scam.",
+   "new_flags": []
+  },
+  {
+   "chunk": 4,
+   "time_s": 61.6,
+   "risk_score": 59,
+   "level": "Medium",
+   "live_verdict": "unclear",
+   "live_reason": "Not enough information to determine if it is a scam.",
+   "new_flags": [
+    "F14"
+   ]
+  },
+  {
+   "chunk": 5,
+   "time_s": 75.6,
+   "risk_score": 80,
+   "level": "High",
+   "live_verdict": "scam",
+   "live_reason": "The caller is asking for personal information and shows signs of impersonation.",
+   "new_flags": [
+    "F20"
+   ]
+  },
+  {
+   "chunk": 6,
+   "time_s": 88.0,
+   "risk_score": 70,
+   "level": "High",
+   "live_verdict": "unclear",
+   "live_reason": "Not enough information to determine if it is a scam.",
+   "new_flags": []
+  },
+  {
+   "chunk": 7,
+   "time_s": 102.4,
+   "risk_score": 70,
+   "level": "High",
+   "live_verdict": "unclear",
+   "live_reason": "Not enough information to determine if it is a scam.",
+   "new_flags": []
+  },
+  {
+   "chunk": 8,
+   "time_s": 114.4,
+   "risk_score": 80,
+   "level": "High",
+   "live_verdict": "scam",
+   "live_reason": "The caller is asking for personal information and providing limited details, which are common signs of a scam.",
+   "new_flags": []
+  },
+  {
+   "chunk": 9,
+   "time_s": 128.8,
+   "risk_score": 80,
+   "level": "High",
+   "live_verdict": "scam",
+   "live_reason": "The caller is asking for personal information and there are signs of impersonation.",
+   "new_flags": []
+  },
+  {
+   "chunk": 10,
+   "time_s": 141.6,
+   "risk_score": 90,
+   "level": "High",
+   "live_verdict": "scam",
+   "live_reason": "The caller asked for personal information and mentioned a fee, which are red flags.",
+   "new_flags": []
+  },
+  {
+   "chunk": 11,
+   "time_s": 152.0,
+   "risk_score": 90,
+   "level": "High",
+   "live_verdict": "scam",
+   "live_reason": "The caller asked for personal information and mentioned a processing fee.",
+   "new_flags": []
+  }
+ ],
+ "true_label": "scam",
+ "grounding_fixes": [],
+ "quotes_verified": true
+}

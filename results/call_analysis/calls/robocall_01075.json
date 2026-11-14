@@ -1,0 +1,37 @@
+{
+ "id": "robocall_01075",
+ "source": "robocall",
+ "true_label": "scam",
+ "scam_type": "F3 / gov_law",
+ "is_synthetic": false,
+ "transcript": "The reason of this call is to inform you about a package has been seized under your name by us customs and border protection with contraband of drugs and cash. So the moment you receive this message, please press one to talk to our investigation officer to avoid legal consequences.",
+ "duration_s": 20.0,
+ "chunks": [
+  {
+   "index": 0,
+   "start_s": 0.0,
+   "end_s": 12.0,
+   "n_words": 30,
+   "segments": [
+    {
+     "speaker": "Caller",
+     "turn": 0,
+     "text": "The reason of this call is to inform you about a package has been seized under your name by us customs and border protection with contraband of drugs and cash."
+    }
+   ]
+  },
+  {
+   "index": 1,
+   "start_s": 12.0,
+   "end_s": 20.0,
+   "n_words": 20,
+   "segments": [
+    {
+     "speaker": "Caller",
+     "turn": 0,
+     "text": "So the moment you receive this message, please press one to talk to our investigation officer to avoid legal consequences."
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,89 @@
+{
+ "id": "youtube_scam_00112",
+ "source": "youtube_scam",
+ "true_label": "scam",
+ "scam_type": "F4 / ModderPaulScambaits",
+ "is_synthetic": false,
+ "transcript": "hello hello thank you for calling PayPal my name is I'm husband she said that I should call you yes told me I help you sir um while we have a invoice from PayPal for Christmas lights 507.99 um are you feeling okay you sound like you sound like you might have a cold no no I'm fine sir okay you got a little bit of a cold okay Yeah Christmas lights do you want to cancel the subscription or you have an issue with your order I love Christmas lights but not that much I mean that's expensive okay in order to cancel it what you need to do sir is that first of all you need to be in front of your computer the world's most trusted remote access oh it's remote access support I've heard of that before yes that's interesting yes yes sir give a click on download for free and just below that do you see password yeah to tell you the password it's a combination of numbers and letters um",
+ "duration_s": 70.4,
+ "chunks": [
+  {
+   "index": 0,
+   "start_s": 0.0,
+   "end_s": 12.0,
+   "n_words": 30,
+   "segments": [
+    {
+     "speaker": null,
+     "turn": 0,
+     "text": "hello hello thank you for calling PayPal my name is I'm husband she said that I should call you yes told me I help you sir um while we have"
+    }
+   ]
+  },
+  {
+   "index": 1,
+   "start_s": 12.0,
+   "end_s": 24.0,
+   "n_words": 30,
+   "segments": [
+    {
+     "speaker": null,
+     "turn": 0,
+     "text": "a invoice from PayPal for Christmas lights 507.99 um are you feeling okay you sound like you sound like you might have a cold no no I'm fine sir okay"
+    }
+   ]
+  },
+  {
+   "index": 2,
+   "start_s": 24.0,
+   "end_s": 36.0,
+   "n_words": 30,
+   "segments": [
+    {
+     "speaker": null,
+     "turn": 0,
+     "text": "you got a little bit of a cold okay Yeah Christmas lights do you want to cancel the subscription or you have an issue with your order I love Christmas"
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "start_s": 36.0,
+   "end_s": 48.0,
+   "n_words": 30,
+   "segments": [
+    {
+     "speaker": null,
+     "turn": 0,
+     "text": "lights but not that much I mean that's expensive okay in order to cancel it what you need to do sir is that first of all you need to be"
+    }
+   ]
+  },
+  {
+   "index": 4,
+   "start_s": 48.0,
+   "end_s": 60.0,
+   "n_words": 30,
+   "segments": [
+    {
+     "speaker": null,
+     "turn": 0,
+     "text": "in front of your computer the world's most trusted remote access oh it's remote access support I've heard of that before yes that's interesting yes yes sir give a click"
+    }
+   ]
+  },
+  {
+   "index": 5,
+   "start_s": 60.0,
+   "end_s": 70.4,
+   "n_words": 26,
+   "segments": [
+    {
+     "speaker": null,
+     "turn": 0,
+     "text": "on download for free and just below that do you see password yeah to tell you the password it's a combination of numbers and letters um"
+    }
+   ]
+  }
+ ]
+}
