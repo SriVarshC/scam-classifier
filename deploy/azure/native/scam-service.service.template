@@ -1,0 +1,25 @@
+# systemd unit for the scam classifier service (native install, no Docker).
+# install_native.sh fills in __TOKEN__ on the VM and installs it as /etc/systemd/system/scam-service.service
+# (mode 600). Never commit a filled-in copy.
+[Unit]
+Description=Scam call classifier service (FastAPI)
+After=network-online.target ollama.service
+Wants=network-online.target ollama.service
+
+[Service]
+User=azureuser
+WorkingDirectory=/home/azureuser/scam-classifier
+Environment=SCAM_SERVICE_TOKEN=__TOKEN__
+Environment=CALL_LLM_PROVIDER=ollama
+Environment=CALL_LLM_MODEL=qwen2.5:7b
+Environment=OLLAMA_HOST_URL=http://127.0.0.1:11434
+Environment=SCAM_LLM_TIMEOUT_SECONDS=100
+Environment=CALL_LLM_KEEP_ALIVE=24h
+Environment=HF_HUB_DISABLE_TELEMETRY=1
+ExecStart=/home/azureuser/scam-classifier/.venv/bin/python -m uvicorn service.app:create_app --factory --app-dir src --host 127.0.0.1 --port 8100 --workers 1
+Restart=always
+RestartSec=5
+TimeoutStartSec=900
+
+[Install]
+WantedBy=multi-user.target

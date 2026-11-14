@@ -1,0 +1,10 @@
+# Caddy: automatic HTTPS (Let's Encrypt) for <ip-with-dashes>.sslip.io -> scam service on 127.0.0.1:8100.
+# install_native.sh replaces __HOST__.
+__HOST__ {
+	encode gzip
+	reverse_proxy 127.0.0.1:8100 {
+		transport http {
+			response_header_timeout 130s
+		}
+	}
+}
