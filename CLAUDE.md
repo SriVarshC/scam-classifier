@@ -162,7 +162,18 @@ Label definition (v1): any unwanted/scam/robocall = 1, legitimate = 0.
 
 ---
 
-## Splits (in `src/split.py`)
+## Splits (in `src/split.py`) — as implemented (v2)
+- Real rows: `StratifiedGroupKFold` (7 folds → ~71/14/14), grouped by `group_id`
+  (robocall = FTC campaign, others = conversation), stratified by fraud type. UNK rows excluded.
+- Synthetic rows: train only, capped at 30% of train. 30% of that budget is reserved for
+  synthetic F0 (hard negatives first) so "synthetic style" isn't a fraud-only signal; the rest
+  tops each fraud type up to ≥ 300 and is then spread evenly.
+- Test B = hold out each real source (abcd, robocall) entirely; test on all its rows + the other
+  real source's A-test rows. B val uses held-out synthetic rows (only exception to "real-only val").
+- Output: `data/processed/splits/{A,B_abcd,B_robocall}_{train,val,test}.csv`; summary in
+  `results/split_summary.md`.
+
+Original plan (kept for reference):
 - **Per-source split fractions** follow the dataset table above (synthetic = train only).
 - **Test A — random:** stratified train/val/test using those fractions (70/15/15 for ABCD,
   60/20/20 for real scam sources).
