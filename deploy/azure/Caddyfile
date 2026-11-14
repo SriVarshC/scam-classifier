@@ -1,0 +1,10 @@
+# Caddy gets a free HTTPS certificate (Let's Encrypt) for $DOMAIN automatically
+# and forwards requests to the scam service. Ports 80 and 443 must be open on the VM.
+{$DOMAIN} {
+	encode gzip
+	reverse_proxy service:8100 {
+		transport http {
+			response_header_timeout 130s
+		}
+	}
+}

@@ -34,3 +34,6 @@ deberta_results.zip
 
 # Call analysis LLM answer cache (prompts contain transcripts; regenerate locally)
 results/call_analysis/cache/
+
+# Azure deployment secrets
+deploy/azure/.env

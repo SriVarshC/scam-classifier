@@ -55,16 +55,29 @@ def compute_score(flags, trust, judgement, clf_fraud_score):
 
 
 class CallClassifier:
-    """Embeddings + LR on synthetic training calls (demo calls excluded); fraud score = 1 - P(F0)."""
+    """Embeddings + LR on synthetic training calls (demo calls excluded); fraud score = 1 - P(F0).
+    `artifact`: path to a saved, already-trained model (service/artifacts/classifier.joblib) so a server
+    does not need the datasets. Without it, the model is trained from data/processed."""
 
-    def __init__(self, exclude_ids):
+    def __init__(self, exclude_ids=(), artifact=None):
         from models import EmbeddingLR
-        merged = pd.read_csv(PROCESSED / "merged.csv")
-        train = pd.read_csv(SPLITS / "B_real_train.csv")[["id"]].merge(merged, on="id")
-        base = train["id"].str.replace(r"_c\d+$", "", regex=True)
-        train = train[~base.isin(set(exclude_ids))]
-        self.model = EmbeddingLR().fit(list(train["text"]), train["fraud_type"].tolist())
+        if artifact is not None and Path(artifact).exists():
+            import joblib
+            self.model = EmbeddingLR()
+            self.model.clf = joblib.load(artifact)
+            self.model.classes_ = self.model.clf.classes_
+        else:
+            merged = pd.read_csv(PROCESSED / "merged.csv")
+            train = pd.read_csv(SPLITS / "B_real_train.csv")[["id"]].merge(merged, on="id")
+            base = train["id"].str.replace(r"_c\d+$", "", regex=True)
+            train = train[~base.isin(set(exclude_ids))]
+            self.model = EmbeddingLR().fit(list(train["text"]), train["fraud_type"].tolist())
         self.f0 = list(self.model.classes_).index("F0")
+
+    def save(self, path):
+        import joblib
+        Path(path).parent.mkdir(parents=True, exist_ok=True)
+        joblib.dump(self.model.clf, path)
 
     def fraud_score(self, raw_text):
         return float(1 - self.model.predict_proba([clean_text(raw_text)])[0, self.f0])

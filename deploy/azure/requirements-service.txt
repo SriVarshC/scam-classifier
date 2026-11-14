@@ -1,0 +1,14 @@
+# Pinned to the versions the service was tested with locally (Python 3.12).
+# torch is installed separately from the CPU-only index (see Dockerfile).
+sentence-transformers==6.3.0
+transformers==5.23.0
+fastapi==0.163.0
+uvicorn==0.54.0
+pydantic==2.14.3
+scikit-learn==1.9.1
+scipy==1.18.1
+numpy==2.5.4
+pandas==3.1.1
+joblib==1.6.0
+PyYAML==6.0.3
+datasketch==2.0.0

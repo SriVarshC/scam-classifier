@@ -20,6 +20,7 @@ from call_analysis.flags import ScriptMatcher, rule_flags_in_chunk, t06_holds, v
 from call_analysis.scoring import CallClassifier, compute_score, render  # noqa: E402
 from call_analysis.settings import load as load_settings  # noqa: E402
 
+ARTIFACT = Path(__file__).resolve().parent / "artifacts" / "classifier.joblib"
 MAX_CLASSES = 20
 MAX_CLASS_LEN = 100
 FALLBACK_WORDS = 40
@@ -63,7 +64,7 @@ class ScamService:
         from models import get_encoder
         get_encoder().persist = False                 # never write callers' embeddings to disk
         self.matcher = ScriptMatcher()
-        self.classifier = CallClassifier(exclude_ids=[])
+        self.classifier = CallClassifier(artifact=os.environ.get("SCAM_CLASSIFIER_PATH", str(ARTIFACT)))
         self.llm, self.llm_error = llm, None
         if self.llm is None and use_llm:
             try:

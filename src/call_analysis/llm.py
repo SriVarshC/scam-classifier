@@ -178,9 +178,14 @@ class CallLLM:
                                                   "Authorization": f"Bearer {self.api_key}"})
             with urllib.request.urlopen(req, timeout=self.timeout_s) as r:
                 return json.loads(r.read())["choices"][0]["message"]["content"]
+        options = {"temperature": 0, "seed": SEED, "num_ctx": int(os.environ.get("CALL_LLM_NUM_CTX", "8192"))}
+        # CPU-only servers: cap the answer length and pin the thread count (env vars; unset = Ollama default)
+        for env, key in (("CALL_LLM_NUM_PREDICT", "num_predict"), ("CALL_LLM_NUM_THREAD", "num_thread")):
+            if os.environ.get(env):
+                options[key] = int(os.environ[env])
         body = {"model": self.model, "prompt": prompt, "stream": False, "format": "json",
                 "keep_alive": os.environ.get("CALL_LLM_KEEP_ALIVE", "30m"),  # avoid slow reloads between calls
-                "options": {"temperature": 0, "seed": SEED, "num_ctx": 8192}}
+                "options": options}
         req = urllib.request.Request(f"{self.host}/api/generate", data=json.dumps(body).encode(),
                                      headers={"Content-Type": "application/json"})
         with urllib.request.urlopen(req, timeout=self.timeout_s) as r:
