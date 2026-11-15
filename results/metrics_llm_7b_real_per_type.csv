@@ -1,0 +1,15 @@
+model,test,variant,fraud_type,f1,support
+zero_shot_llm,B_real,full,F0,0.9328493647912885,289
+zero_shot_llm,B_real,full,F1,0.0,2
+zero_shot_llm,B_real,full,F3,0.4444444444444444,4
+zero_shot_llm,B_real,full,F4,0.25,5
+zero_shot_llm,B_real,first50,F0,0.9743589743589743,57
+zero_shot_llm,B_real,first50,F1,0.0,2
+zero_shot_llm,B_real,first50,F4,0.0,1
+zero_shot_llm,R,full,F0,0.9428571428571428,284
+zero_shot_llm,R,full,F1,0.0,1
+zero_shot_llm,R,full,F3,0.5454545454545454,5
+zero_shot_llm,R,full,F4,0.16666666666666666,10
+zero_shot_llm,R,first50,F0,0.9655172413793104,56
+zero_shot_llm,R,first50,F1,0.0,1
+zero_shot_llm,R,first50,F4,0.0,3

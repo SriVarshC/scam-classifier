@@ -164,8 +164,88 @@ def load_call_transcripts():
     return _finish(df, "call_transcripts")
 
 
-LOADERS = [load_robocall, load_youtube_scam, load_bothbosu, load_kaggle_scam_nonscam,
-           load_call_transcripts, load_usenix, load_synthetic_own]
+CALLCENTER_PER_DOMAIN = 600   # balanced sample: Medicare alone is 64% of the 91.7k calls
+CALLCENTER_SKIP = {"(reupload)PII_redacted_auto_insurance_script.zip"}  # same 1,749 files as auto_insurance_*
+# CallCenterEN redaction tags -> the masks every other source gets from clean.py
+CC_NAME_TAGS = {"PERSON_NAME"}
+CC_EMAIL_TAGS = {"EMAIL_ADDRESS"}
+CC_NUMBER_TAGS = {"PHONE_NUMBER", "MONEY_AMOUNT", "DATE", "TIME", "DURATION", "DATE_INTERVAL", "NUMBER_SEQUENCE",
+                  "ACCOUNT_NUMBER", "CREDIT_CARD_NUMBER", "CREDIT_CARD_EXPIRATION", "CREDIT_CARD_CVV",
+                  "DATE_OF_BIRTH", "US_SOCIAL_SECURITY_NUMBER", "PASSPORT_NUMBER", "DRIVERS_LICENSE",
+                  "HEALTHCARE_NUMBER", "VEHICLE_ID", "PERSON_AGE", "BANKING_INFORMATION", "STATISTICS", "IP_ADDRESS"}
+CC_TAG_RE = re.compile(r"\[([A-Z_]+)\]")
+
+
+def _cc_tags(text):
+    """Names -> a token clean.py masks as [NAME]; number-like -> a digit (-> [NUMBER]); email -> an address
+    (-> [EMAIL]); every other tag (organization, location, occupation, ...) is left for clean.py to remove."""
+    def repl(m):
+        tag = m.group(1)
+        if tag in CC_NAME_TAGS:
+            return " ccpersonnamecc "
+        if tag in CC_NUMBER_TAGS:
+            return " 0 "
+        if tag in CC_EMAIL_TAGS:
+            return " x@x "
+        return m.group(0)
+    return CC_TAG_RE.sub(repl, text)
+
+
+def load_callcenter_en():
+    """CallCenterEN (AIxBlock): real, PII-redacted BPO customer-service calls - all genuine (F0).
+    Outbound sales calls count as legal telemarketing (F0). Sampled per domain zip (SEED), read straight
+    from the zips (data/raw untouched). No speaker turns in this source."""
+    import random
+    import zipfile
+    from config import SEED
+    rng, rows, seen = random.Random(SEED), [], set()
+    for z in sorted((RAW / "callcenter_en").glob("*.zip")):
+        if z.name in CALLCENTER_SKIP:
+            continue
+        zf = zipfile.ZipFile(z)
+        names = sorted(n for n in zf.namelist() if n.endswith(".json") and "__MACOSX" not in n
+                       and not n.rsplit("/", 1)[-1].startswith("._"))
+        names = [n for n in names if n.rsplit("/", 1)[-1] not in seen]      # re-uploads overlap other zips
+        domain = re.sub(r"[^a-z0-9]+", "_", z.stem.lower().replace("(re-uploaded)", "")).strip("_")
+        for n in rng.sample(names, min(CALLCENTER_PER_DOMAIN, len(names))):
+            base = n.rsplit("/", 1)[-1]
+            seen.add(base)
+            try:
+                d = json.loads(zf.read(n))
+            except ValueError:   # 9 of 61.5k medicare files are empty or truncated in the release
+                print(f"[callcenter_en] skipped unreadable file {base}")
+                continue
+            rows.append({"text": _cc_tags(d.get("text") or ""), "fraud_type": "F0", "scam_type": domain,
+                         "is_synthetic": False, "region": "us", "group_id": "callcenter_en_" + base})
+    return _finish(pd.DataFrame(rows), "callcenter_en")
+
+
+HV_NOISE_RE = re.compile(r"\[[a-z ]+\]|<unk>")
+# the bank's name incl. ASR variants ("happy/her/helper valley national bank", "harper value national", "harper va")
+HV_BANK_RE = re.compile(r"\b(\w+ )?valley national bank\b|\bharper( valley| value| va)?( national)?( bank)?\b")
+
+
+def load_harper_valley():
+    """HarperValleyBank: 1,446 acted (crowd-worker) genuine bank calls -> all F0, synthetic (train only).
+    The bank name is replaced by "the bank" and the speakers' names (metadata) are masked in clean.py."""
+    base = RAW / "harper_valley" / "data"
+    rows = []
+    for path in sorted((base / "transcript").glob("*.json")):
+        segs = sorted(json.loads(path.read_text(encoding="utf-8")), key=lambda s: s["start_ms"])
+        text = " ".join((s.get("human_transcript") or s.get("transcript") or "") for s in segs)
+        text = HV_BANK_RE.sub("the bank", HV_NOISE_RE.sub(" ", text))
+        meta = json.loads((base / "metadata" / path.name).read_text(encoding="utf-8"))
+        names = [meta.get("caller", {}).get("metadata", {}).get("first and last name", ""),
+                 meta.get("agent", {}).get("metadata", {}).get("agent_name", "")]
+        tasks = sorted({t.get("task_type", "") for t in meta.get("tasks", []) if isinstance(t, dict)})
+        rows.append({"text": text, "fraud_type": "F0", "scam_type": "bank_" + "+".join(tasks).replace(" ", "_"),
+                     "is_synthetic": True, "region": "us", "known_names": "|".join(filter(None, names)),
+                     "group_id": "harper_valley_" + path.stem})
+    return _finish(pd.DataFrame(rows), "harper_valley")
+
+
+LOADERS = [load_robocall, load_youtube_scam, load_callcenter_en, load_bothbosu, load_kaggle_scam_nonscam,
+           load_call_transcripts, load_usenix, load_synthetic_own, load_harper_valley]
 
 
 def load_all():

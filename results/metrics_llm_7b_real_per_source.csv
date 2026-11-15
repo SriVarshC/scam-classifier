@@ -1,0 +1,11 @@
+model,test,variant,source,n,flag_rate,label_mean
+zero_shot_llm,B_real,full,callcenter_en,289.0,0.11072664359861592,0.0
+zero_shot_llm,B_real,full,robocall,11.0,0.5454545454545454,1.0
+zero_shot_llm,B_real,first50,callcenter_en,57.0,0.0,0.0
+zero_shot_llm,B_real,first50,robocall,3.0,0.0,1.0
+zero_shot_llm,R,full,callcenter_en,284.0,0.07042253521126761,0.0
+zero_shot_llm,R,full,robocall,12.0,0.25,1.0
+zero_shot_llm,R,full,youtube_scam,4.0,0.25,1.0
+zero_shot_llm,R,first50,callcenter_en,56.0,0.0,0.0
+zero_shot_llm,R,first50,robocall,1.0,0.0,1.0
+zero_shot_llm,R,first50,youtube_scam,3.0,0.0,1.0

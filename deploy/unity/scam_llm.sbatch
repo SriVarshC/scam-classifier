@@ -7,7 +7,7 @@
 #   4. exits after IDLE_MIN minutes without LLM requests; near the time limit, if still busy, submits its successor
 #SBATCH --job-name=scam-llm
 #SBATCH --partition=gpu
-#SBATCH --qos=short
+#SBATCH --qos=normal
 #SBATCH --gpus=1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=16G

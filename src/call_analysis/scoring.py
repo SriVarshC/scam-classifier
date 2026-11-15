@@ -59,7 +59,9 @@ class CallClassifier:
     `artifact`: path to a saved, already-trained model (service/artifacts/classifier.joblib) so a server
     does not need the datasets. Without it, the model is trained from data/processed."""
 
-    def __init__(self, exclude_ids=(), artifact=None):
+    def __init__(self, exclude_ids=(), artifact=None, split="B_real"):
+        """split: training split - "B_real" = synthetic only (original), "R" = real calls (incl. CallCenterEN
+        genuine calls) + synthetic capped at 30% (service classifier since 2026-11-15)."""
         from models import EmbeddingLR
         if artifact is not None and Path(artifact).exists():
             import joblib
@@ -68,7 +70,7 @@ class CallClassifier:
             self.model.classes_ = self.model.clf.classes_
         else:
             merged = pd.read_csv(PROCESSED / "merged.csv")
-            train = pd.read_csv(SPLITS / "B_real_train.csv")[["id"]].merge(merged, on="id")
+            train = pd.read_csv(SPLITS / f"{split}_train.csv")[["id"]].merge(merged, on="id")
             base = train["id"].str.replace(r"_c\d+$", "", regex=True)
             train = train[~base.isin(set(exclude_ids))]
             self.model = EmbeddingLR().fit(list(train["text"]), train["fraud_type"].tolist())

@@ -110,6 +110,9 @@ honest, reliable signal with very few false alarms — not a perfect score.
 | `call_transcripts` | Call Transcripts Scam Determinations (mealss) | Synthetic | conversation = scam if any turn scam-like; genuine if all neutral/legitimate; else dropped |
 | `usenix_romance` | USENIX artifact — **tax_scam and e-commerce classes only** | Synthetic | phone-call style |
 | `synthetic_own` | Team synthetic calls (`synthetic_fraud_calls.csv`) | Synthetic | |
+| `callcenter_en` | CallCenterEN (AIxBlock, 91,706 real BPO calls, CC BY-NC 4.0, research only) | Real | added 2026-11-15 (user OK); all F0; no speaker turns; PII tags must be normalised; long calls; one zip is a duplicate re-upload |
+| `harper_valley` | HarperValleyBank (1,446 acted bank calls, CC BY 4.0) | Synthetic (acted) | added 2026-11-15 (user OK); all F0 hard negatives, train only; mask "harper valley national bank" |
+| (planned) own synthetic v2 | LLM-generated calls for F2/F6/F7/F8 + genuine look-alikes | Synthetic | approved 2026-11-15; train only, within the 30% cap |
 
 **Removed (not phone calls):** ABCD (typed chat), USENIX `romance_baiting` (texting) and
 `neutral` (AI-assistant chat). Do not re-add.

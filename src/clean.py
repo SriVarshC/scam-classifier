@@ -66,7 +66,37 @@ def clean_text(text, known_names=""):
     text = PUNCT_RE.sub(" ", text)
     text = REPEAT_NUM_RE.sub("[NUMBER] ", text)
     text = text.replace("[number]", "[NUMBER]").replace("[name]", "[NAME]").replace("[email]", "[EMAIL]")
-    return re.sub(r"\s+", " ", text).strip()
+    text = text.replace("ccpersonnamecc", "[NAME]")    # CallCenterEN [PERSON_NAME] (see load_data._cc_tags)
+    # Names are masked first (so they never reach the model), then the [NAME] token itself is dropped:
+    # pre-redacted real calls contain it far more often than lowercase ASR scam transcripts, so even its
+    # presence would identify the source (agreed with user 2026-11-15).
+    text = text.replace("[NAME]", " ")
+    text = spoken_numbers(re.sub(r"\s+", " ", text).strip())
+    return REPEAT_NUM_RE.sub("[NUMBER] ", text).strip()
+
+
+# Spoken numbers ("eight five six", "nine thirty") -> [NUMBER], same as digits in other sources.
+# "one" / "oh" only count next to another number word ("one" alone is usually not a number).
+NUM_WORDS = set("zero two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen "
+                "sixteen seventeen eighteen nineteen twenty thirty forty fifty sixty seventy eighty ninety "
+                "hundred thousand million".split())
+WEAK_NUM_WORDS = {"one", "oh"}
+
+
+def spoken_numbers(text):
+    words, out, i = text.split(), [], 0
+    while i < len(words):
+        j = i
+        while j < len(words) and (words[j] in NUM_WORDS or words[j] in WEAK_NUM_WORDS or words[j] == "[NUMBER]"):
+            j += 1
+        run = words[i:j]
+        if run and (any(w in NUM_WORDS or w == "[NUMBER]" for w in run) or len(run) >= 2):
+            out.append("[NUMBER]")
+            i = j
+        else:
+            out.append(words[i])
+            i += 1
+    return " ".join(out)
 
 
 def chunk_long_texts(df, max_words=CHUNK_WORDS, max_chunks=MAX_CHUNKS):

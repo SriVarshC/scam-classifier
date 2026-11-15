@@ -1,0 +1,26 @@
+== F0 (6/30 flagged as format/style tokens)
+would, *this is*, john, *thanks*, is from, *hi*, new, insurance, wanted, would you, wanted to, xyz, offering, from xyz, the wrong, delivery, you like, *is name*, re offering, just wanted, package, interested, re verified, let us, *name we*, dialed, company, thanks for, business, *wrong number*
+
+== F1 (2/30 flagged as format/style tokens)
+bank, bank account, *account number*, account, credit, branch, charge, text, zelle, kindly, was that, the bank, this bank, card, credit card, the charge, have won, pin, and credit, reversal, the branch, your credit, we are, provide your, *number from*, have been, your bank, no didn, us your, savings
+
+== F2 (4/30 flagged as format/style tokens)
+*can help*, the account, *how can*, can, help, add, *email*, for calling, can you, bank this, send, on file, and need, *the number*, union, my, online banking, file, is in, my online, send it, need, reset, you verify, of attorney, the hospital, banking, last four, hospital, four
+
+== F3 (2/30 flagged as format/style tokens)
+irs, social security, social, the irs, *security number*, tax, your social, security, matter, payment, taxes, officer, not, do not, federal, badge, *badge number*, case, will, benefits, legal, action, arrest, compliance, immediate, administration, issue, security administration, cooperate, serious
+
+== F4 (2/30 flagged as format/style tokens)
+amazon, refund, the refund, computer, your account, your computer, account, virus, your amazon, process, system, secure, *thank you*, *thank*, amazon account, unauthorized, safe, microsoft, for your, please, amazon gift, windows, my computer, now, technical, that, any, support, access, from amazon
+
+== F6 (0/30 flagged as format/style tokens)
+crypto, withdraw, week, last week, percent, members, trade, capital, but the, deposit, maybe, group, professor, from the, borrow it, borrow, our members, withdrawal, mentor, last, investment, can borrow, nice, thirty percent, to trade, profits but, chat last, my profits, it, take out
+
+== F7 (4/30 flagged as format/style tokens)
+video, recorded, your contacts, contacts, your camera, camera, delete, hi it, *number in*, your family, video call, tonight, that call, *send number*, *hey*, delete it, *pay number*, call was, dating, was recorded, the dating, and your, know, private, have everything, your device, family, me from, device, who is
+
+== F8 (1/30 flagged as format/style tokens)
+they, *talk*, talk to, he, grandson, anyone, his, she, emergency, bail, can talk, dad, please, me please, needs, in gift, stay, your grandson, have your, it me, mom, they re, hurt, on this, was in, accident, no time, crying, watching you, hang
+
+== F9 (1/30 flagged as format/style tokens)
+gift card, gift, card, the gift, selected, offer, walmart, information, *number gift*, rewards, supervisor, loan, amazing, website, our, sounds amazing, randomly, prize, free, been selected, this gift, congratulations, reward, card from, selected to, you ve, legitimate offer, amazing how, to receive, it is

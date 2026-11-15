@@ -1,51 +1,59 @@
-# Split summary (Option 1: train on synthetic only)
+# Split summary (Option 1 tests A / B_*: train on synthetic only; Test R: real val/test)
 
 ## Test A — synthetic, in-distribution
 
-| split   |   rows |   real % |   scam % |   genuine |   F0 |   F1 |   F2 |   F3 |   F4 |   F6 |   F7 |   F8 |   F9 | sources                                                                        |
-|:--------|-------:|---------:|---------:|----------:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|:-------------------------------------------------------------------------------|
-| train   |   4580 |        0 |     71.3 |      1313 | 1313 |  345 |  257 |  714 | 1005 |  256 |  212 |  255 |  223 | bothbosu, call_transcripts, kaggle_scam_nonscam, synthetic_own, usenix_romance |
-| val     |    917 |        0 |     71.3 |       263 |  263 |   69 |   52 |  143 |  201 |   51 |   42 |   51 |   45 | bothbosu, call_transcripts, kaggle_scam_nonscam, synthetic_own, usenix_romance |
-| test    |    917 |        0 |     71.3 |       263 |  263 |   69 |   51 |  143 |  201 |   51 |   43 |   51 |   45 | bothbosu, call_transcripts, kaggle_scam_nonscam, synthetic_own, usenix_romance |
+| split   |   rows |   real % |   scam % |   genuine |   F0 |   F1 |   F2 |   F3 |   F4 |   F6 |   F7 |   F8 |   F9 | sources                                                                                       |
+|:--------|-------:|---------:|---------:|----------:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|:----------------------------------------------------------------------------------------------|
+| train   |   5597 |        0 |     58.3 |      2336 | 2336 |  345 |  256 |  711 | 1004 |  256 |  212 |  255 |  222 | bothbosu, call_transcripts, harper_valley, kaggle_scam_nonscam, synthetic_own, usenix_romance |
+| val     |   1120 |        0 |     58.2 |       468 |  468 |   69 |   51 |  142 |  200 |   51 |   43 |   51 |   45 | bothbosu, call_transcripts, harper_valley, kaggle_scam_nonscam, synthetic_own, usenix_romance |
+| test    |   1120 |        0 |     58.3 |       467 |  467 |   69 |   52 |  143 |  200 |   51 |   42 |   51 |   45 | bothbosu, call_transcripts, harper_valley, kaggle_scam_nonscam, synthetic_own, usenix_romance |
 
 ## Test B_real — trained on synthetic, tested on all real calls
 
-| split   |   rows |   real % |   scam % |   genuine |   F0 |   F1 |   F2 |   F3 |   F4 |   F6 |   F7 |   F8 |   F9 | sources                                                                        |
-|:--------|-------:|---------:|---------:|----------:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|:-------------------------------------------------------------------------------|
-| train   |   5497 |        0 |     71.3 |      1576 | 1576 |  414 |  309 |  857 | 1206 |  307 |  254 |  306 |  268 | bothbosu, call_transcripts, kaggle_scam_nonscam, synthetic_own, usenix_romance |
-| val     |    917 |        0 |     71.3 |       263 |  263 |   69 |   51 |  143 |  201 |   51 |   43 |   51 |   45 | bothbosu, call_transcripts, kaggle_scam_nonscam, synthetic_own, usenix_romance |
-| test    |    819 |      100 |     99.8 |         2 |    2 |   65 |    0 |  295 |  433 |    0 |    0 |    2 |   22 | robocall, youtube_scam                                                         |
+| split   |   rows |   real % |   scam % |   genuine |    F0 |   F1 |   F2 |   F3 |   F4 |   F6 |   F7 |   F8 |   F9 | sources                                                                                       |
+|:--------|-------:|---------:|---------:|----------:|------:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|:----------------------------------------------------------------------------------------------|
+| train   |   6717 |        0 |     58.3 |      2804 |  2804 |  414 |  307 |  853 | 1204 |  307 |  255 |  306 |  267 | bothbosu, call_transcripts, harper_valley, kaggle_scam_nonscam, synthetic_own, usenix_romance |
+| val     |   1120 |        0 |     58.3 |       467 |   467 |   69 |   52 |  143 |  200 |   51 |   42 |   51 |   45 | bothbosu, call_transcripts, harper_valley, kaggle_scam_nonscam, synthetic_own, usenix_romance |
+| test    |  15816 |      100 |      5.1 |     15002 | 15002 |   65 |    0 |  293 |  431 |    0 |    0 |    2 |   23 | callcenter_en, robocall, youtube_scam                                                         |
 
 ## Test B_bothbosu — bothbosu never seen in training
 
-| split   |   rows |   real % |   scam % |   genuine |   F0 |   F1 |   F2 |   F3 |   F4 |   F6 |   F7 |   F8 |   F9 | sources                                                              |
-|:--------|-------:|---------:|---------:|----------:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|:---------------------------------------------------------------------|
-| train   |   3731 |        0 |     77   |       857 |  857 |  414 |  308 |  575 |  675 |  307 |  255 |  306 |   34 | call_transcripts, kaggle_scam_nonscam, synthetic_own, usenix_romance |
-| val     |    622 |        0 |     77   |       143 |  143 |   69 |   52 |   95 |  113 |   51 |   42 |   51 |    6 | call_transcripts, kaggle_scam_nonscam, synthetic_own, usenix_romance |
-| test    |   2061 |        0 |     59.3 |       839 |  839 |    0 |    0 |  330 |  619 |    0 |    0 |    0 |  273 | bothbosu                                                             |
+| split   |   rows |   real % |   scam % |   genuine |   F0 |   F1 |   F2 |   F3 |   F4 |   F6 |   F7 |   F8 |   F9 | sources                                                                             |
+|:--------|-------:|---------:|---------:|----------:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|:------------------------------------------------------------------------------------|
+| train   |   4956 |        0 |     57.9 |      2087 | 2087 |  414 |  308 |  570 |  676 |  307 |  254 |  306 |   34 | call_transcripts, harper_valley, kaggle_scam_nonscam, synthetic_own, usenix_romance |
+| val     |    826 |        0 |     58   |       347 |  347 |   69 |   51 |   96 |  112 |   51 |   43 |   51 |    6 | call_transcripts, harper_valley, kaggle_scam_nonscam, synthetic_own, usenix_romance |
+| test    |   2055 |        0 |     59.3 |       837 |  837 |    0 |    0 |  330 |  616 |    0 |    0 |    0 |  272 | bothbosu                                                                            |
 
 ## Test B_call_transcripts — call_transcripts never seen in training
 
-| split   |   rows |   real % |   scam % |   genuine |   F0 |   F1 |   F2 |   F3 |   F4 |   F6 |   F7 |   F8 |   F9 | sources                                                      |
-|:--------|-------:|---------:|---------:|----------:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|:-------------------------------------------------------------|
-| train   |   5451 |        0 |     71.5 |      1555 | 1555 |  411 |  308 |  847 | 1200 |  307 |  255 |  305 |  263 | bothbosu, kaggle_scam_nonscam, synthetic_own, usenix_romance |
-| val     |    909 |        0 |     71.5 |       259 |  259 |   68 |   52 |  142 |  201 |   51 |   42 |   50 |   44 | bothbosu, kaggle_scam_nonscam, synthetic_own, usenix_romance |
-| test    |     54 |        0 |     53.7 |        25 |   25 |    4 |    0 |   11 |    6 |    0 |    0 |    2 |    6 | call_transcripts                                             |
+| split   |   rows |   real % |   scam % |   genuine |   F0 |   F1 |   F2 |   F3 |   F4 |   F6 |   F7 |   F8 |   F9 | sources                                                                     |
+|:--------|-------:|---------:|---------:|----------:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|:----------------------------------------------------------------------------|
+| train   |   6671 |        0 |     58.3 |      2783 | 2783 |  410 |  308 |  844 | 1198 |  307 |  255 |  304 |  262 | bothbosu, harper_valley, kaggle_scam_nonscam, synthetic_own, usenix_romance |
+| val     |   1113 |        0 |     58.3 |       464 |  464 |   69 |   51 |  141 |  200 |   51 |   42 |   51 |   44 | bothbosu, harper_valley, kaggle_scam_nonscam, synthetic_own, usenix_romance |
+| test    |     53 |        0 |     54.7 |        24 |   24 |    4 |    0 |   11 |    6 |    0 |    0 |    2 |    6 | call_transcripts                                                            |
 
 ## Test B_kaggle_scam_nonscam — kaggle_scam_nonscam never seen in training
 
-| split   |   rows |   real % |   scam % |   genuine |   F0 |   F1 |   F2 |   F3 |   F4 |   F6 |   F7 |   F8 |   F9 | sources                                                   |
-|:--------|-------:|---------:|---------:|----------:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|:----------------------------------------------------------|
-| train   |   4925 |        0 |     74.9 |      1234 | 1234 |  312 |  308 |  800 | 1165 |  307 |  254 |  306 |  239 | bothbosu, call_transcripts, synthetic_own, usenix_romance |
-| val     |    822 |        0 |     75.1 |       205 |  205 |   52 |   52 |  133 |  195 |   51 |   43 |   51 |   40 | bothbosu, call_transcripts, synthetic_own, usenix_romance |
-| test    |    667 |        0 |     40   |       400 |  400 |  119 |    0 |   67 |   47 |    0 |    0 |    0 |   34 | kaggle_scam_nonscam                                       |
+| split   |   rows |   real % |   scam % |   genuine |   F0 |   F1 |   F2 |   F3 |   F4 |   F6 |   F7 |   F8 |   F9 | sources                                                                  |
+|:--------|-------:|---------:|---------:|----------:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|:-------------------------------------------------------------------------|
+| train   |   6145 |        0 |     60   |      2460 | 2460 |  312 |  308 |  796 | 1163 |  307 |  254 |  306 |  239 | bothbosu, call_transcripts, harper_valley, synthetic_own, usenix_romance |
+| val     |   1025 |        0 |     59.9 |       411 |  411 |   52 |   51 |  133 |  194 |   51 |   43 |   51 |   39 | bothbosu, call_transcripts, harper_valley, synthetic_own, usenix_romance |
+| test    |    667 |        0 |     40   |       400 |  400 |  119 |    0 |   67 |   47 |    0 |    0 |    0 |   34 | kaggle_scam_nonscam                                                      |
 
 ## Test B_synthetic_own — synthetic_own never seen in training
 
-| split   |   rows |   real % |   scam % |   genuine |   F0 |   F1 |   F2 |   F3 |   F4 |   F6 |   F7 |   F8 |   F9 | sources                                                         |
-|:--------|-------:|---------:|---------:|----------:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|:----------------------------------------------------------------|
-| train   |   3522 |        0 |     69.2 |      1084 | 1084 |  105 |    0 |  857 | 1206 |    0 |    0 |    2 |  268 | bothbosu, call_transcripts, kaggle_scam_nonscam, usenix_romance |
-| val     |    587 |        0 |     69.3 |       180 |  180 |   18 |    0 |  143 |  201 |    0 |    0 |    0 |   45 | bothbosu, call_transcripts, kaggle_scam_nonscam, usenix_romance |
-| test    |   2305 |        0 |     75.1 |       575 |  575 |  360 |  360 |    0 |    0 |  358 |  297 |  355 |    0 | synthetic_own                                                   |
+| split   |   rows |   real % |   scam % |   genuine |   F0 |   F1 |   F2 |   F3 |   F4 |   F6 |   F7 |   F8 |   F9 | sources                                                                        |
+|:--------|-------:|---------:|---------:|----------:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|:-------------------------------------------------------------------------------|
+| train   |   4742 |        0 |     51.3 |      2311 | 2311 |  105 |    0 |  853 | 1204 |    0 |    0 |    1 |  268 | bothbosu, call_transcripts, harper_valley, kaggle_scam_nonscam, usenix_romance |
+| val     |    791 |        0 |     51.3 |       385 |  385 |   18 |    0 |  143 |  200 |    0 |    0 |    1 |   44 | bothbosu, call_transcripts, harper_valley, kaggle_scam_nonscam, usenix_romance |
+| test    |   2304 |        0 |     75   |       575 |  575 |  360 |  359 |    0 |    0 |  358 |  297 |  355 |    0 | synthetic_own                                                                  |
+
+## Test R — real val/test; train = real train fold + synthetic (30% of train)
+
+| split   |   rows |   real % |   scam % |   genuine |    F0 |   F1 |   F2 |   F3 |   F4 |   F6 |   F7 |   F8 |   F9 | sources                                                                                                                              |
+|:--------|-------:|---------:|---------:|----------:|------:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|-----:|:-------------------------------------------------------------------------------------------------------------------------------------|
+| train   |  16134 |       70 |     21.1 |     12736 | 12736 |  345 |  222 |  818 | 1176 |  221 |  183 |  222 |  211 | bothbosu, call_transcripts, callcenter_en, harper_valley, kaggle_scam_nonscam, robocall, synthetic_own, usenix_romance, youtube_scam |
+| val     |   2260 |      100 |      5.2 |      2143 |  2143 |    8 |    0 |   46 |   61 |    0 |    0 |    0 |    2 | callcenter_en, robocall, youtube_scam                                                                                                |
+| test    |   2261 |      100 |      5.2 |      2143 |  2143 |   10 |    0 |   44 |   61 |    0 |    0 |    0 |    3 | callcenter_en, robocall, youtube_scam                                                                                                |
 
 Test C: evaluate.py truncates every test set above to its first 50 words.

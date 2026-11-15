@@ -25,7 +25,7 @@ cannot be restricted). Both Unity keys are locked down on the VM:
 | Step | Time |
 |---|---|
 | Start request -> controller picks it up | < 1 s |
-| Slurm queue (`gpu`, `--qos=short`, any GPU) | 2–4 s |
+| Slurm queue (`gpu`, `--qos=normal`, any GPU; `short` allows only 1 job per user, which blocks renewal) | 2–4 s |
 | Copy model /work -> node disk | ~60 s |
 | Start Ollama + load model on GPU (Tesla M40) | ~35 s |
 | **Cold start total** (`POST /v1/gpu/start` -> ready) | **~101 s** |

@@ -14,7 +14,8 @@ from evaluate import binary_metrics, choose_threshold, fraud_score, predict_type
 from models import MODELS, OPTIONAL_MODELS, ZeroShotLLM
 
 SPLITS = PROCESSED / "splits"
-TESTS = ["A"] + sorted(p.name[:-len("_test.csv")] for p in SPLITS.glob("B_*_test.csv"))
+TESTS = (["A"] + sorted(p.name[:-len("_test.csv")] for p in SPLITS.glob("B_*_test.csv"))
+         + (["R"] if (SPLITS / "R_test.csv").exists() else []))
 EARLY_WORDS = 50
 
 
@@ -95,17 +96,17 @@ def write_summary(metrics, per_type, suffix=""):
     print(f"\nresults -> {RESULTS / f'summary{suffix}.md'}")
 
 
-def run_llm(llm_model, n_sample, n_early, workers=1):
+def run_llm(llm_model, n_sample, n_early, workers=1, host="http://localhost:11434", tests=None, suffix=""):
     """Zero-shot LLM (no training) on a fixed random sample of every test set.
     It is the same model for every split, so ONE shared validation sample (from Test A val)
     sets the FPR <= 2% threshold. Writes results/metrics_llm*.csv + results/summary_llm.md."""
     from config import SEED
     merged = pd.read_csv(PROCESSED / "merged.csv")
-    model = ZeroShotLLM(model=llm_model, workers=workers).fit([], [])
+    model = ZeroShotLLM(model=llm_model, host=host, workers=workers).fit([], [])
     val = load_split("A", merged)["val"]
     val = val.sample(min(n_sample, len(val)), random_state=SEED)
     rows, type_rows, source_rows = [], [], []
-    for test in TESTS:
+    for test in (tests or TESTS):
         t = load_split(test, merged)["test"]
         t = t.sample(min(n_sample, len(t)), random_state=SEED)
         for early in (False, True):
@@ -123,17 +124,17 @@ def run_llm(llm_model, n_sample, n_early, workers=1):
                   f"recall={row['recall']:.3f} F1={row['f1_binary']:.3f} AUC={row['roc_auc']:.3f} "
                   f"macroF1(types)={row['macro_f1_types']:.3f}", flush=True)
     metrics = pd.DataFrame(rows)
-    metrics.to_csv(RESULTS / "metrics_llm.csv", index=False)
-    pd.DataFrame(type_rows).to_csv(RESULTS / "metrics_llm_per_type.csv", index=False)
-    pd.DataFrame(source_rows).to_csv(RESULTS / "metrics_llm_per_source.csv", index=False)
+    metrics.to_csv(RESULTS / f"metrics_llm{suffix}.csv", index=False)
+    pd.DataFrame(type_rows).to_csv(RESULTS / f"metrics_llm{suffix}_per_type.csv", index=False)
+    pd.DataFrame(source_rows).to_csv(RESULTS / f"metrics_llm{suffix}_per_source.csv", index=False)
     cols = ["model", "test", "variant", "n_test", "fpr", "recall", "precision", "f1_binary", "roc_auc",
             "macro_f1_types", "tn", "fp", "fn", "tp"]
     md = ["# Zero-shot LLM results\n",
           f"Model `{llm_model}` via Ollama, no training. Random sample of {n_sample} calls per test set "
           f"({n_early} for `first{EARLY_WORDS}`); threshold from a shared validation sample (FPR <= 2%).\n",
           metrics[cols].round(3).to_markdown(index=False), ""]
-    (RESULTS / "summary_llm.md").write_text("\n".join(md), encoding="utf-8")
-    print(f"\nresults -> {RESULTS / 'summary_llm.md'}")
+    (RESULTS / f"summary_llm{suffix}.md").write_text("\n".join(md), encoding="utf-8")
+    print(f"\nresults -> {RESULTS / f'summary_llm{suffix}.md'}")
 
 
 if __name__ == "__main__":
@@ -144,6 +145,8 @@ if __name__ == "__main__":
     ap.add_argument("--llm-sample", type=int, default=200)
     ap.add_argument("--llm-early-sample", type=int, default=60)
     ap.add_argument("--llm-workers", type=int, default=1, help="parallel requests (= OLLAMA_NUM_PARALLEL)")
+    ap.add_argument("--llm-host", default="http://localhost:11434", help="Ollama URL (e.g. a tunnel to a GPU)")
+    ap.add_argument("--llm-suffix", default="", help="suffix for the LLM result files (keeps older runs)")
     ap.add_argument("--use-transformer", action="store_true", help="run ONLY fine-tuned DeBERTa (needs a GPU)")
     ap.add_argument("--deberta-model", default="microsoft/deberta-v3-small")
     ap.add_argument("--deberta-epochs", type=int, default=3)
@@ -153,6 +156,7 @@ if __name__ == "__main__":
         main(["deberta"], suffix="_deberta", tests=args.tests,
              model_kwargs={"model_name": args.deberta_model, "epochs": args.deberta_epochs})
     elif args.use_llm:
-        run_llm(args.llm_model, args.llm_sample, args.llm_early_sample, args.llm_workers)
+        run_llm(args.llm_model, args.llm_sample, args.llm_early_sample, args.llm_workers,
+                host=args.llm_host, tests=args.tests, suffix=args.llm_suffix)
     else:
         main(args.models, tests=args.tests)

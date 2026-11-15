@@ -12,6 +12,10 @@ Test B  (never-seen sources):
              sources; test = that whole source -> FPR + recall on an unseen source.
              (usenix_romance is 100% scam, so it is train-only and never a held-out test.)
 Test C  (early decision): evaluate.py truncates every test set to its first 50 words.
+Test R  (real mix, added 2026-11-15 with CallCenterEN): real calls split by group ~71/14/14 (val/test = REAL
+        only, real-world ratio = mostly genuine); training = the real train fold + synthetic calls capped at
+        30% of the training set (stratified by fraud type). B_real (above) still answers "trained on synthetic
+        only, how does it do on real calls?" - now including 15k real genuine pieces, so real FPR is measurable.
 
 UNK rows (no fraud type) are excluded everywhere.
 
@@ -26,6 +30,7 @@ from config import PROCESSED, RESULTS, SEED, UNKNOWN
 SPLITS = PROCESSED / "splits"
 N_FOLDS = 7  # Test A: 1 test fold + 1 val fold + 5 train folds ≈ 71/14/14
 VAL_SHARE = 0.15
+SYNTH_SHARE = 0.30  # Test R: synthetic share of the training set (CLAUDE.md: at most 30%)
 OUT_COLS = ["id", "fraud_type", "label"]
 
 
@@ -78,7 +83,7 @@ def main():
     SPLITS.mkdir(parents=True, exist_ok=True)
     for old in SPLITS.glob("*.csv"):
         old.unlink()
-    md = ["# Split summary (Option 1: train on synthetic only)\n"]
+    md = ["# Split summary (Option 1 tests A / B_*: train on synthetic only; Test R: real val/test)\n"]
 
     # ---------- Test A: in-distribution synthetic ----------
     fold = group_folds(synth)
@@ -101,6 +106,18 @@ def main():
         check_no_leak(f"B_{src}", tr, va, g)
         write(f"B_{src}", tr, va, g)
         describe(f"Test B_{src} — {src} never seen in training", (tr, va, g), md)
+
+    # ---------- Test R: real val/test, real + capped synthetic training ----------
+    fold = group_folds(real)
+    r_train, r_val, r_test = real[fold >= 2], real[fold == 1], real[fold == 0]
+    budget = int(SYNTH_SHARE / (1 - SYNTH_SHARE) * len(r_train))
+    frac = min(1.0, budget / len(synth))
+    s_part = synth.groupby("fraud_type", group_keys=False).sample(frac=frac, random_state=SEED)
+    r_train = pd.concat([r_train, s_part])
+    check_no_leak("R", r_train, r_val, r_test)
+    write("R", r_train, r_val, r_test)
+    describe(f"Test R — real val/test; train = real train fold + synthetic ({100 * len(s_part) / len(r_train):.0f}% of train)",
+             (r_train, r_val, r_test), md)
 
     md += ["Test C: evaluate.py truncates every test set above to its first 50 words.", ""]
     RESULTS.mkdir(exist_ok=True)
