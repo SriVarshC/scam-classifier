@@ -27,10 +27,45 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Response  # noqa: E402
+import threading  # noqa: E402
+import time  # noqa: E402
+
+from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response  # noqa: E402
+from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from pydantic import BaseModel, Field  # noqa: E402
 
 MAX_TEXT_CHARS = int(os.environ.get("SCAM_MAX_TEXT_CHARS", "20000"))
+# Browser origins allowed to call the public /v1/callers/* endpoints (the CallGuard dashboard).
+CORS_ORIGINS = [o.strip().rstrip("/") for o in os.environ.get(
+    "SCAM_CORS_ORIGINS", "https://sumit2015saurabh-tech.github.io").split(",") if o.strip()]
+
+
+class CallerCheck(BaseModel):
+    caller: str = Field(min_length=1, max_length=100)
+
+
+class CallerReport(BaseModel):
+    caller: str = Field(min_length=1, max_length=100)
+    ticket: str = Field(min_length=10, max_length=200)
+    manual: bool = False
+
+
+class RateLimit:
+    """Tiny in-memory per-IP limiter for the public endpoints (N requests per window)."""
+    def __init__(self, n, window_s=60):
+        self.n, self.window, self.hits, self.lock = n, window_s, {}, threading.Lock()
+
+    def __call__(self, request: Request):
+        ip = request.client.host if request.client else "?"
+        now = time.monotonic()
+        with self.lock:
+            recent = [t for t in self.hits.get(ip, []) if now - t < self.window]
+            if len(recent) >= self.n:
+                raise HTTPException(status_code=429, detail="Too many requests, try again in a minute")
+            recent.append(now)
+            self.hits[ip] = recent
+            if len(self.hits) > 10000:
+                self.hits.clear()
 
 
 class ClassifyRequest(BaseModel):
@@ -118,5 +153,31 @@ def create_app(service=None, token=None):
             return get_service().analyze(text, request_id)
         except AssertionError:  # an evidence quote failed verification - never return unverified evidence
             raise HTTPException(status_code=500, detail="Internal evidence check failed")
+
+    # ---------- shared flagged-caller list (public, called by the CallGuard dashboard in the browser) ----------
+    app.add_middleware(CORSMiddleware, allow_origins=CORS_ORIGINS, allow_methods=["POST"],
+                       allow_headers=["Content-Type"], max_age=600)
+    check_limit, report_limit = RateLimit(60), RateLimit(20)
+
+    def registry():
+        reg = get_service().callers
+        if reg is None:
+            raise HTTPException(status_code=404, detail="Caller registry not configured (SCAM_CALLERS_SECRET unset)")
+        return reg
+
+    @app.post("/v1/callers/check", dependencies=[Depends(check_limit)])
+    def callers_check(req: CallerCheck, response: Response):
+        """Has this caller (phone number, wa:/tg: id) been reported as fraud by CallGuard users?"""
+        response.headers["Cache-Control"] = "no-store"
+        return registry().check(req.caller)
+
+    @app.post("/v1/callers/report", dependencies=[Depends(report_limit)])
+    def callers_report(req: CallerReport, response: Response):
+        """Add a caller using the signed single-use ticket from a fraud/uncertain classification."""
+        response.headers["Cache-Control"] = "no-store"
+        out = registry().report(req.ticket, req.caller, manual=req.manual)
+        if not out["ok"]:
+            raise HTTPException(status_code=400, detail=out["reason"])
+        return out
 
     return app

@@ -77,9 +77,12 @@ def _slug(text):
 
 
 class ScamService:
-    def __init__(self, llm=None, use_llm=True, gpu=None, gpu_llm=None):
-        """gpu / gpu_llm: optional on-demand GPU copy of the same model (service/gpu.py). Default: from env."""
+    def __init__(self, llm=None, use_llm=True, gpu=None, gpu_llm=None, callers=None):
+        """gpu / gpu_llm: optional on-demand GPU copy of the same model (service/gpu.py). Default: from env.
+        callers: shared flagged-caller registry (service/callers.py); default from env (off if no secret)."""
         from models import get_encoder
+        from service.callers import CallerRegistry
+        self.callers = callers if callers is not None else CallerRegistry.from_env()
         get_encoder().persist = False                 # never write callers' embeddings to disk
         self.matcher = ScriptMatcher()
         self.classifier = CallClassifier(artifact=os.environ.get("SCAM_CLASSIFIER_PATH", str(ARTIFACT)))
@@ -209,6 +212,10 @@ class ScamService:
         classes = [label, f"category:{category}", f"risk_level:{level.lower()}", f"risk_score:{score}",
                    f"recommendation:{_slug(recommendation)}", f"type:{_slug(scam_type)}",
                    f"llm_verdict:{_slug(verdict)}"]
+        # signed single-use ticket so the dashboard can add this caller to the shared fraud list (fraud/uncertain)
+        ticket = self.callers.issue_ticket(label, category, score) if self.callers else None
+        if ticket:
+            classes.append(f"report:{ticket}")
         classes += [f"flag:{f['id']}" for f in sorted(reds, key=lambda f: f["timestamp_s"])]
         classes = [c[:MAX_CLASS_LEN] for c in classes][:MAX_CLASSES]
 
@@ -224,7 +231,7 @@ class ScamService:
             "red_flags": [{k: f[k] for k in ("id", "name", "severity", "quote", "timestamp_s")} for f in reds],
             "trust_signals": [{k: t[k] for k in ("id", "name", "quote")} for t in trust],
             "score_components": components, "timeline": timeline,
-            "llm_model": self.llm_name, "llm_backend": llm_backend, "notes": notes,
+            "llm_model": self.llm_name, "llm_backend": llm_backend, "notes": notes, "report_ticket": ticket,
             "disclaimer": "The risk score is a weighted rule/LLM/classifier score, not a probability. "
                           "It does not prove fraud.",
         }

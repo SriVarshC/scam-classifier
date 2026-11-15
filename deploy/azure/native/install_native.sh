@@ -23,7 +23,9 @@ echo "embedding model cached"
 echo "== systemd unit (token not printed)"
 TOKEN="$(tr -d '\r\n' < "$TOKEN_FILE")"
 [[ ${#TOKEN} -ge 16 ]] || { echo "token too short" >&2; exit 1; }
-sed "s|__TOKEN__|${TOKEN}|" deploy/azure/native/scam-service.service.template | sudo tee /etc/systemd/system/scam-service.service >/dev/null
+CALLERS_SECRET="$(python3 -c "import secrets;print(secrets.token_urlsafe(48))")"
+sudo install -d -m 700 -o "$(id -un)" /var/lib/scam-service
+sed "s|__TOKEN__|${TOKEN}|; s|__CALLERS_SECRET__|${CALLERS_SECRET}|" deploy/azure/native/scam-service.service.template | sudo tee /etc/systemd/system/scam-service.service >/dev/null
 sudo chmod 600 /etc/systemd/system/scam-service.service
 shred -u "$TOKEN_FILE" 2>/dev/null || rm -f "$TOKEN_FILE"
 sudo systemctl daemon-reload
