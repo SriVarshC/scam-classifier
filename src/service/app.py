@@ -12,6 +12,8 @@ Environment:
   SCAM_LLM_TIMEOUT_SECONDS    LLM deadline (default 20; the transcription API waits 30 s in total)
   SCAM_MAX_TEXT_CHARS         max transcript length (default 20000)
   CALL_LLM_PROVIDER / CALL_LLM_MODEL / CALL_LLM_API_URL / CALL_LLM_API_KEY   LLM selection (see llm.py)
+  SCAM_GPU_*                  optional on-demand Unity GPU copy of the same model (see service/gpu.py)
+                              -> GET /v1/gpu/status, POST /v1/gpu/start (warm-up), POST /v1/gpu/stop
 
 Run:  python -m uvicorn service.app:create_app --factory --app-dir src --host 127.0.0.1 --port 8100
 Privacy: transcripts are processed in memory only - no logging of text, no disk cache.
@@ -74,7 +76,34 @@ def create_app(service=None, token=None):
     def status():
         svc = get_service()
         return {"llm_model": svc.llm_name, "llm_available": svc.llm is not None,
-                "llm_error": svc.llm_error, "max_text_chars": MAX_TEXT_CHARS}
+                "llm_error": svc.llm_error, "max_text_chars": MAX_TEXT_CHARS,
+                "gpu_enabled": svc.gpu is not None, "gpu_ready": bool(svc.gpu and svc.gpu.ready(fresh=True))}
+
+    def gpu_or_404():
+        svc = get_service()
+        if svc.gpu is None:
+            raise HTTPException(status_code=404, detail="GPU backend not configured (SCAM_GPU_OLLAMA_URL unset)")
+        return svc.gpu
+
+    @app.get("/v1/gpu/status", dependencies=[Depends(check_auth)])
+    def gpu_status():
+        return gpu_or_404().status()
+
+    @app.post("/v1/gpu/start", dependencies=[Depends(check_auth)])
+    def gpu_start():
+        """Warm-up before a demo: start the Unity GPU job now (about 1.5 min until gpu_ready)."""
+        gpu = gpu_or_404()
+        if gpu.ready(fresh=True):
+            return {"started": False, "ready": True, "message": "GPU model already running"}
+        sent = gpu.start("manual", force=True)
+        return {"started": sent, "ready": False,
+                "message": "start requested; poll /v1/gpu/status until ready is true (usually ~1.5 min)"}
+
+    @app.post("/v1/gpu/stop", dependencies=[Depends(check_auth)])
+    def gpu_stop():
+        result = gpu_or_404().stop()
+        gpu_or_404().mark_down()
+        return result
 
     @app.post("/v1/classify", dependencies=[Depends(check_auth)])
     def classify(req: ClassifyRequest, response: Response, x_request_id: str = Header(default="")):

@@ -60,7 +60,8 @@ def _slug(text):
 
 
 class ScamService:
-    def __init__(self, llm=None, use_llm=True):
+    def __init__(self, llm=None, use_llm=True, gpu=None, gpu_llm=None):
+        """gpu / gpu_llm: optional on-demand GPU copy of the same model (service/gpu.py). Default: from env."""
         from models import get_encoder
         get_encoder().persist = False                 # never write callers' embeddings to disk
         self.matcher = ScriptMatcher()
@@ -74,6 +75,15 @@ class ScamService:
             except (SystemExit, Exception) as e:  # service must start even without an LLM
                 self.llm_error = f"LLM unavailable at startup: {e}"
         self._llm_lock = threading.Lock()
+        self._gpu_lock = threading.Lock()
+        self.gpu, self.gpu_llm = gpu, gpu_llm
+        if self.gpu is None and use_llm and llm is None:
+            from service.gpu import GpuBackend
+            self.gpu = GpuBackend.from_env()
+        if self.gpu is not None and self.gpu_llm is None and self.llm is not None:
+            from call_analysis.llm import CallLLM     # same provider + model, only the host differs
+            self.gpu_llm = CallLLM(model=self.llm.model, provider="ollama", host=self.gpu.url, use_cache=False,
+                                   retries=0, timeout_s=float(os.environ.get("SCAM_GPU_TIMEOUT_SECONDS", "20")))
         if self.llm is not None and use_llm and llm is None:
             self._warm_up()
 
@@ -93,15 +103,28 @@ class ScamService:
         return f"{self.llm.provider}:{self.llm.model}" if self.llm else None
 
     def _ask_llm(self, transcript):
+        """Returns (llm_output or None, problem or None, backend). Backend: "gpu", "cpu" or None.
+        GPU first when its tunnel is up; otherwise (or if the GPU call fails) the CPU model answers and,
+        if enabled, the GPU job is started in the background for the next requests."""
         from call_analysis.llm import quick
         if not self.llm:
-            return None, self.llm_error or "LLM disabled"
+            return None, self.llm_error or "LLM disabled", None
+        if self.gpu is not None and self.gpu_llm is not None:
+            if self.gpu.ready():
+                try:
+                    with self._gpu_lock:
+                        out = quick(self.gpu_llm, transcript)
+                    if out:
+                        return out, None, "gpu"
+                except Exception:  # job ended / tunnel dropped mid-request -> CPU answers this one
+                    self.gpu.mark_down()
+            self.gpu.start("request")
         try:
             with self._llm_lock:                       # one LLM request at a time
                 out = quick(self.llm, transcript)
-            return out, None if out else "LLM answer could not be parsed"
+            return out, None if out else "LLM answer could not be parsed", "cpu"
         except Exception as e:  # timeout, connection refused, HTTP 5xx ...
-            return None, f"LLM call failed: {type(e).__name__}"
+            return None, f"LLM call failed: {type(e).__name__}", "cpu"
 
     def analyze(self, text, request_id):
         cfg = load_settings()
@@ -124,7 +147,7 @@ class ScamService:
             timeline.append({"window": i, "end_s": chunk["end_s"], "risk_score": score, "level": level,
                              "new_flags": [f["id"] for f in new]})
 
-        llm_out, llm_problem = self._ask_llm(render(call["chunks"]))
+        llm_out, llm_problem, llm_backend = self._ask_llm(render(call["chunks"]))
         reds = [f for f in first.values() if f["severity"] != "trust"]
         trust = [f for f in first.values() if f["severity"] == "trust"]
         t06 = t06_holds(call, reds)
@@ -168,7 +191,7 @@ class ScamService:
             "red_flags": [{k: f[k] for k in ("id", "name", "severity", "quote", "timestamp_s")} for f in reds],
             "trust_signals": [{k: t[k] for k in ("id", "name", "quote")} for t in trust],
             "score_components": components, "timeline": timeline,
-            "llm_model": self.llm_name, "notes": notes,
+            "llm_model": self.llm_name, "llm_backend": llm_backend, "notes": notes,
             "disclaimer": "The risk score is a weighted rule/LLM/classifier score, not a probability. "
                           "It does not prove fraud.",
         }

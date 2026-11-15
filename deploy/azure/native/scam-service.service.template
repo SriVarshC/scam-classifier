@@ -15,6 +15,9 @@ Environment=CALL_LLM_MODEL=qwen2.5:7b
 Environment=OLLAMA_HOST_URL=http://127.0.0.1:11434
 Environment=SCAM_LLM_TIMEOUT_SECONDS=100
 Environment=CALL_LLM_KEEP_ALIVE=24h
+# On-demand Unity GPU copy of the same model (deploy/unity/README.md). Remove these two lines to turn it off.
+Environment=SCAM_GPU_OLLAMA_URL=http://127.0.0.1:11435
+Environment=SCAM_GPU_TIMEOUT_SECONDS=20
 Environment=HF_HUB_DISABLE_TELEMETRY=1
 ExecStart=/home/azureuser/scam-classifier/.venv/bin/python -m uvicorn service.app:create_app --factory --app-dir src --host 127.0.0.1 --port 8100 --workers 1
 Restart=always

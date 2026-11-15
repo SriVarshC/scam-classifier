@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Forced command for the Unity controller's key (user gputunnel on the VM), installed as
+# /usr/local/bin/scam-gpu-ctl. Protocol:   <status text> | ssh gputunnel@vm wait
+#   1. store the controller's status report (max 4 KB) in $DIR/status
+#   2. wait up to 300 s for a request written by the service ($DIR/request: start|stop), print it, exit
+#      (prints "noop" on timeout). $DIR/seen = last time the controller was connected.
+#   A "." heartbeat line is written every second BEFORE looking at the request: if the controller has
+#   gone away, the write fails (SIGPIPE) and this process exits instead of swallowing the request.
+#   The controller uses only the last line.
+set -u
+DIR=/var/lib/scam-gpu
+umask 007
+[[ "${SSH_ORIGINAL_COMMAND:-}" == "wait" ]] || { echo "allowed: wait" >&2; exit 2; }
+head -c 4096 > "$DIR/.status.tmp" && mv -f "$DIR/.status.tmp" "$DIR/status"
+for _ in $(seq 300); do
+  echo . || exit 0
+  date +%s > "$DIR/seen"
+  if [[ -f "$DIR/request" ]]; then
+    action="$(head -c 16 "$DIR/request")"; rm -f "$DIR/request"
+    case "$action" in start|stop) echo "$action"; exit 0 ;; esac
+  fi
+  sleep 1
+done
+echo noop
