@@ -1,0 +1,11 @@
+id,source,scam_type,label,seconds,label_out,risk_level,risk_score,llm_verdict,llm_backend,category,flags,error
+callcenter_en_03364,callcenter_en,,0,8.0,uncertain,Safe,0,scam,gpu,F4,,
+callcenter_en_01219,callcenter_en,,0,7.8,not_fraud,Safe,0,not scam,gpu,F0,,
+callcenter_en_05191,callcenter_en,,0,7.9,uncertain,Low,31,scam,gpu,F1,F20|F21,
+callcenter_en_03798,callcenter_en,,0,8.4,not_fraud,Safe,0,not scam,gpu,F0,F20,
+callcenter_en_03601,callcenter_en,,0,9.8,not_fraud,Safe,0,not scam,gpu,F0,F20,
+robocall_00787,robocall,financial,1,5.2,uncertain,Safe,5,scam,gpu,F1,,
+youtube_scam_00000,youtube_scam,JimBrowning,1,5.0,not_fraud,Safe,0,not scam,gpu,F0,,
+robocall_00031,robocall,gov_law,1,5.4,fraud,High,80,scam,gpu,F3,F12|F17,
+robocall_00610,robocall,prize_job_fee,1,6.1,uncertain,Safe,0,scam,gpu,F9,,
+robocall_00294,robocall,gov_ssa,1,5.3,fraud,Medium,55,scam,gpu,F3,F17,
