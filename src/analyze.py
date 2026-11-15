@@ -13,6 +13,7 @@ import pandas as pd
 
 from config import RESULTS, SEED
 from evaluate import binary_metrics, choose_threshold, fraud_score
+from fit_cache import fit_or_load
 from models import TfidfLR
 from run_experiment import TESTS, load_split
 from config import PROCESSED
@@ -44,7 +45,8 @@ def collect_errors(merged):
     fps, fns = [], []
     for test in TESTS:
         parts = load_split(test, merged)
-        model = TfidfLR().fit(list(parts["train"]["text"]), parts["train"]["fraud_type"].tolist())
+        model = fit_or_load("tfidf_lr", TfidfLR, list(parts["train"]["text"]),
+                            parts["train"]["fraud_type"].tolist(), parts["train"]["id"].tolist())
         thr = choose_threshold(fraud_score(model.predict_proba(list(parts["val"]["text"])), model.classes_),
                                parts["val"]["label"].to_numpy())
         df = parts["test"].assign(score=fraud_score(model.predict_proba(list(parts["test"]["text"])),
@@ -81,7 +83,8 @@ def shuffle_check(merged, seeds=(SEED, 0, 1, 2, 3)):
     aucs = []
     for seed in seeds:
         y = parts["train"]["fraud_type"].sample(frac=1, random_state=seed).tolist()
-        model = TfidfLR().fit(list(parts["train"]["text"]), y)
+        model = fit_or_load("tfidf_lr", TfidfLR, list(parts["train"]["text"]), y,
+                           parts["train"]["id"].tolist())
         test_s = fraud_score(model.predict_proba(list(parts["test"]["text"])), model.classes_)
         aucs.append(binary_metrics(parts["test"]["label"].to_numpy(), test_s, 0.5)["roc_auc"])
     return {"auc_mean": float(np.mean(aucs)), "auc_std": float(np.std(aucs)), "aucs": aucs,

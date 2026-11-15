@@ -81,8 +81,16 @@ class CallClassifier:
         Path(path).parent.mkdir(parents=True, exist_ok=True)
         joblib.dump(self.model.clf, path)
 
+    def fraud_scores(self, raw_texts):
+        """Fraud score for several texts in ONE embedding batch (PERF.md P1-3)."""
+        raw_texts = list(raw_texts)
+        if not raw_texts:
+            return []
+        proba = self.model.predict_proba([clean_text(t) for t in raw_texts])
+        return (1 - proba[:, self.f0]).tolist()
+
     def fraud_score(self, raw_text):
-        return float(1 - self.model.predict_proba([clean_text(raw_text)])[0, self.f0])
+        return self.fraud_scores([raw_text])[0]
 
 
 def render(chunks):

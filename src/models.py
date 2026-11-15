@@ -84,7 +84,9 @@ class TfidfLR:
 
 class SentenceEncoder:
     """all-MiniLM-L6-v2 with an on-disk cache (data/processed/emb_cache.npz) keyed by text hash,
-    so each text is encoded once across all splits and runs."""
+    so each text is encoded once across all splits and runs.
+    With persist = False (the live service) the cache is bypassed entirely: callers' text is never
+    cached, so memory cannot grow per request (PERF.md P1-5)."""
 
     MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 
@@ -117,16 +119,23 @@ class SentenceEncoder:
         os.replace(tmp, self.path)
         self._unsaved = 0
 
+    def _encode(self, texts):
+        if self.model is None:
+            from sentence_transformers import SentenceTransformer
+            self.model = SentenceTransformer(self.MODEL_NAME, device="cpu")
+        return self.model.encode(list(texts), batch_size=64, show_progress_bar=len(texts) > 256,
+                                 normalize_embeddings=True)
+
     def encode(self, texts):
         import hashlib
+        texts = list(texts)
+        if not self.persist:
+            # Service mode: every caller's text is new, so a cache could only grow (PERF.md P1-5).
+            return self._encode(texts) if texts else np.zeros((0, 384), dtype="float32")
         keys = [hashlib.md5(t.encode("utf-8")).hexdigest() for t in texts]
         missing = sorted({k: t for k, t in zip(keys, texts) if k not in self.cache}.items())
         if missing:
-            if self.model is None:
-                from sentence_transformers import SentenceTransformer
-                self.model = SentenceTransformer(self.MODEL_NAME, device="cpu")
-            vecs = self.model.encode([t for _, t in missing], batch_size=64,
-                                     show_progress_bar=len(missing) > 256, normalize_embeddings=True)
+            vecs = self._encode([t for _, t in missing])
             self.cache.update({k: v for (k, _), v in zip(missing, vecs)})
             self._unsaved += len(missing)
             if self._unsaved >= self.SAVE_EVERY:

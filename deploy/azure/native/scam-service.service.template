@@ -13,7 +13,7 @@ Environment=SCAM_SERVICE_TOKEN=__TOKEN__
 Environment=CALL_LLM_PROVIDER=ollama
 Environment=CALL_LLM_MODEL=qwen2.5:7b
 Environment=OLLAMA_HOST_URL=http://127.0.0.1:11434
-Environment=SCAM_LLM_TIMEOUT_SECONDS=100
+Environment=SCAM_LLM_TIMEOUT_SECONDS=25
 Environment=CALL_LLM_KEEP_ALIVE=24h
 # On-demand Unity GPU copy of the same model (deploy/unity/README.md). Remove these two lines to turn it off.
 Environment=SCAM_GPU_OLLAMA_URL=http://127.0.0.1:11435
