@@ -48,3 +48,37 @@ F20 + "quickly"/"hurry", T06 not awarded when a high or critical flag fired, F17
    have"*, *"I'm sending a passcode to your current number"*. The scam pattern is asking you to READ the code back.
 Also 29% of genuine BothBosu calls get a high/critical flag (mostly F12 threat words / F14 in insurance and
 delivery calls). With the current weights a single critical flag (40) is not enough for High on its own.
+
+
+## 2026-11-15: F01 v3 (digit-code wordings + not-secret codes), held-out calls incl. REAL genuine calls
+
+Trigger: live two-speaker test missed "Read me the six digit code we texted you". Max 600 calls per group, seed 42.
+
+### Rules: before (v2 + teammate F01 gate)
+
+| group                                                            | kind                     |   calls | F01 one-time code/PIN   | any critical   | any high or critical   | F20 urgency   | F17 scam script   | T06 awarded   |
+|:-----------------------------------------------------------------|:-------------------------|--------:|:------------------------|:---------------|:-----------------------|:--------------|:------------------|:--------------|
+| synthetic bank OTP-theft scams (synthetic_own otp_theft)         | scam (higher = better)   |     127 | 78%                     | 78%            | 78%                    | 18%           | 0%                | 9%            |
+| synthetic bank scams, all F1 (synthetic_own)                     | scam (higher = better)   |     359 | 28%                     | 50%            | 59%                    | 6%            | 0%                | 3%            |
+| real robocall scams                                              | scam (higher = better)   |     600 | 0%                      | 0%             | 31%                    | 11%           | 0%                | 50%           |
+| real YouTube scam calls                                          | scam (higher = better)   |     223 | 0%                      | 4%             | 15%                    | 33%           | 0%                | 58%           |
+| synthetic genuine bank calls (synthetic_own F0)                  | genuine (lower = better) |     599 | 0%                      | 0%             | 0%                     | 0%            | 0%                | 82%           |
+| synthetic genuine calls (bothbosu F0)                            | genuine (lower = better) |     600 | 0%                      | 0%             | 27%                    | 15%           | 0%                | 62%           |
+| synthetic genuine calls (kaggle non-scam)                        | genuine (lower = better) |     400 | 0%                      | 0%             | 6%                     | 4%            | 0%                | 92%           |
+| REAL genuine customer-service calls (callcenter_en)              | genuine (lower = better) |     600 | 2%                      | 4%             | 42%                    | 70%           | 0%                | 20%           |
+| acted genuine bank calls: cards, PINs, passwords (harper_valley) | genuine (lower = better) |     600 | 0%                      | 0%             | 1%                     | 1%            | 0%                | 78%           |
+
+
+### Rules: after (v3 F01 phrases + not-secret codes)
+
+| group                                                            | kind                     |   calls | F01 one-time code/PIN   | any critical   | any high or critical   | F20 urgency   | F17 scam script   | T06 awarded   |
+|:-----------------------------------------------------------------|:-------------------------|--------:|:------------------------|:---------------|:-----------------------|:--------------|:------------------|:--------------|
+| synthetic bank OTP-theft scams (synthetic_own otp_theft)         | scam (higher = better)   |     127 | 79%                     | 79%            | 79%                    | 18%           | 0%                | 9%            |
+| synthetic bank scams, all F1 (synthetic_own)                     | scam (higher = better)   |     359 | 28%                     | 50%            | 60%                    | 6%            | 0%                | 3%            |
+| real robocall scams                                              | scam (higher = better)   |     600 | 0%                      | 0%             | 31%                    | 11%           | 0%                | 50%           |
+| real YouTube scam calls                                          | scam (higher = better)   |     223 | 0%                      | 4%             | 16%                    | 33%           | 0%                | 58%           |
+| synthetic genuine bank calls (synthetic_own F0)                  | genuine (lower = better) |     599 | 0%                      | 0%             | 0%                     | 0%            | 0%                | 82%           |
+| synthetic genuine calls (bothbosu F0)                            | genuine (lower = better) |     600 | 0%                      | 0%             | 27%                    | 15%           | 0%                | 62%           |
+| synthetic genuine calls (kaggle non-scam)                        | genuine (lower = better) |     400 | 0%                      | 0%             | 6%                     | 4%            | 0%                | 92%           |
+| REAL genuine customer-service calls (callcenter_en)              | genuine (lower = better) |     600 | 2%                      | 4%             | 42%                    | 70%           | 0%                | 20%           |
+| acted genuine bank calls: cards, PINs, passwords (harper_valley) | genuine (lower = better) |     600 | 0%                      | 0%             | 1%                     | 1%            | 0%                | 78%           |

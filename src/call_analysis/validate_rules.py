@@ -31,6 +31,11 @@ GROUPS = {  # name: (filter on raw_merged rows, is_scam)
     "synthetic genuine calls (bothbosu F0)": (lambda d: (d.source == "bothbosu") & (d.label == 0), False),
     "synthetic genuine calls (kaggle non-scam)":
         (lambda d: (d.source == "kaggle_scam_nonscam") & (d.label == 0), False),
+    # added 2026-11-15: REAL genuine calls (no speaker labels -> every line is checked = worst case)
+    "REAL genuine customer-service calls (callcenter_en)":
+        (lambda d: (d.source == "callcenter_en") & (d.label == 0), False),
+    "acted genuine bank calls: cards, PINs, passwords (harper_valley)":
+        (lambda d: (d.source == "harper_valley") & (d.label == 0), False),
 }
 
 

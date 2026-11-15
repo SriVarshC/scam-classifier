@@ -198,7 +198,12 @@ class ScamService:
             summary = ("Automatic summary unavailable (" + llm_problem + "). Transcript begins: \""
                        + " ".join(words[:FALLBACK_WORDS]) + ("..." if len(words) > FALLBACK_WORDS else "") + "\"")
             notes.append(f"{llm_problem}; result is based on rules and the classifier only.")
-        notes.append("Speaker roles are unknown for API text, so flags are checked on every line.")
+        speakers = {s["speaker"] for ch in call["chunks"] for s in ch["segments"]}
+        if "You" in speakers:
+            notes.append("Two speakers (Caller / You): red flags are checked on the Caller's lines only.")
+        else:
+            notes.append("No receiver lines (no speaker labels, or only the caller was transcribed), "
+                         "so red flags are checked on every line.")
 
         category = category_for(label, scam_type)
         classes = [label, f"category:{category}", f"risk_level:{level.lower()}", f"risk_score:{score}",

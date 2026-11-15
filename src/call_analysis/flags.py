@@ -28,6 +28,8 @@ NEGATION_WORDS = {"never", "not", "no", "none", "nobody", "dont", "doesnt", "did
                   "cannot", "isnt", "arent", "wasnt", "werent"}
 REQUEST_STEMS = ("read", "tell", "giv", "say", "confirm", "provid", "shar", "repeat", "spell",
                  "ask", "requir", "need", "want", "what")
+NOT_SECRET_CODES = {"zip", "area", "postal", "post", "promo", "promotional", "discount", "coupon", "country",
+                    "dress", "bar", "qr", "error", "product", "sort", "tax", "reference", "confirmation"}
 REQUEST_BEFORE = 5   # words searched before a match for a request verb
 REQUEST_AFTER = 8    # words searched after it ("we sent you * code ... read it back")
 
@@ -40,7 +42,11 @@ RED_FLAGS = [
         "your pin", "pin number", "your password",
         # v2 (after the first demo run, validated on held-out calls): other wordings of the same request
         "sent * code", "sent you * code", "texted * code", "what does the code say",
-        "the pin", "need * pin", "need * password"]),
+        "the pin", "need * pin", "need * password",
+        # v3 (2026-11-15, live two-speaker test missed "read me the six digit code we texted you"):
+        # number words between the verb and "code", and "code ... texted" order. Still gated by _f01_accept
+        # (un-negated request verb nearby), checked on held-out real genuine calls before deploying.
+        "read me * code", "tell me * code", "give me * code", "digit code", "code we texted", "code * texted"]),
     ("F02", "Safe / secure account - move money to protect it", "critical", [
         "safe account", "secure account", "protected account", "safety account", "move your money",
         "move * money * safe", "transfer * funds * safe", "transfer * money * secure", "protect your money",
@@ -192,6 +198,10 @@ def _negated(toks, j):
 def _f01_accept(start, end, toks):
     """F01 needs an un-negated request verb near the match: a PIN/code message alone is not a request."""
     words = [t[0] for t in toks]
+    # "the zip code", "area code", "promo code" are not secrets (v3 gap patterns like "tell me * code" reach them)
+    if any(words[k] in NOT_SECRET_CODES and k + 1 < len(words) and words[k + 1] == "code"
+           for k in range(start, min(end, len(words)))):
+        return False
     lo, hi = max(0, start - REQUEST_BEFORE), min(len(words), end + REQUEST_AFTER)
     return any(words[j].startswith(REQUEST_STEMS) and not _negated(toks, j) for j in range(lo, hi))
 
