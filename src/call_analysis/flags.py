@@ -21,6 +21,16 @@ SUFFIXES = ("", "s", "es", "d", "ed", "ing", "ion", "ation", "ment", "er", "ly")
 GAP = "*"
 MAX_GAP = 3
 
+# F01 (asks for a one-time code / PIN) is the top false alarm on genuine bank calls (PERF.md P0-5):
+# "we will never ask you for your PIN" is a reassurance and "we sent you a code" is a claim, not a
+# request. An F01 match therefore only counts when an un-negated request verb sits next to it.
+NEGATION_WORDS = {"never", "not", "no", "none", "nobody", "dont", "doesnt", "didnt", "wont", "cant",
+                  "cannot", "isnt", "arent", "wasnt", "werent"}
+REQUEST_STEMS = ("read", "tell", "giv", "say", "confirm", "provid", "shar", "repeat", "spell",
+                 "ask", "requir", "need", "want", "what")
+REQUEST_BEFORE = 5   # words searched before a match for a request verb
+REQUEST_AFTER = 8    # words searched after it ("we sent you * code ... read it back")
+
 # id, name, severity, patterns
 RED_FLAGS = [
     ("F01", "Asks for one-time code / PIN / password", "critical", [
@@ -153,17 +163,37 @@ def _match_at(pat, toks, i, ratio):
     return None
 
 
-def find_phrase(text, patterns):
-    """First match of any pattern in text -> (start_token, end_token, tokens) or None."""
+def find_phrase(text, patterns, accept=None):
+    """First match of any pattern in text -> (start_token, end_token, tokens) or None.
+    `accept(start, end, tokens)` can reject a match; scanning then continues after it."""
     cfg = load_settings()["flags"]
     toks = _tokens(text)
     compiled = [_compile(p) for p in patterns]
     for i in range(len(toks)):
         for pat in compiled:
             end = _match_at(pat, toks, i, cfg["fuzzy_token_ratio"])
-            if end is not None and end > i:
+            if end is not None and end > i and (accept is None or accept(i, end, toks)):
                 return i, end, toks
     return None
+
+
+def _negated(toks, j):
+    """True if the request verb at token j is negated ("never ask", "do not tell", "no one will ask").
+    The scan stops at a closer request verb, so "do not tell anyone, now read me the code" keeps F01."""
+    for k in range(j - 1, max(-1, j - 4), -1):
+        word = toks[k][0]
+        if word in NEGATION_WORDS:
+            return True
+        if word.startswith(REQUEST_STEMS):
+            return False
+    return False
+
+
+def _f01_accept(start, end, toks):
+    """F01 needs an un-negated request verb near the match: a PIN/code message alone is not a request."""
+    words = [t[0] for t in toks]
+    lo, hi = max(0, start - REQUEST_BEFORE), min(len(words), end + REQUEST_AFTER)
+    return any(words[j].startswith(REQUEST_STEMS) and not _negated(toks, j) for j in range(lo, hi))
 
 
 def _quote(text, start, end, toks):
@@ -192,8 +222,9 @@ def rule_flags_in_chunk(chunk):
     found = []
     defs = [(f, n, s, p) for f, n, s, p in RED_FLAGS] + [(t, n, "trust", p) for t, n, p in TRUST_SIGNALS]
     for fid, name, severity, patterns in defs:
+        accept = _f01_accept if fid == "F01" else None
         for text, offset in _caller_segments(chunk):
-            hit = find_phrase(text, patterns)
+            hit = find_phrase(text, patterns, accept=accept)
             if hit:
                 found.append(_evidence(fid, name, severity, chunk, text, offset, *hit))
                 break
@@ -209,17 +240,31 @@ class ScriptMatcher:
         self.library = self.encoder.encode(SCAM_SCRIPTS)
         self.threshold = load_settings()["flags"]["script_similarity"]
 
-    def in_chunk(self, chunk):
-        for text, offset in _caller_segments(chunk):
-            sims = self.library @ self.encoder.encode([text])[0]
-            if sims.max() >= self.threshold:
+    def match_call(self, chunks):
+        """F17 for a WHOLE call: collect every caller segment, encode them in one batch and do one
+        matrix multiply, then keep the first hit per chunk (PERF.md P1-3: 96 encodes -> 1).
+        Returns hits in chunk order."""
+        items = [(ch, text, offset) for ch in chunks for text, offset in _caller_segments(ch)]
+        if not items:
+            return []
+        sims = self.encoder.encode([text for _, text, _ in items]) @ self.library.T
+        best, script = sims.max(axis=1), sims.argmax(axis=1)
+        hits = {}
+        for (chunk, text, offset), sim, script_no in zip(items, best, script):
+            if sim >= self.threshold and chunk["index"] not in hits:
                 words = text.split()
                 quote = text if len(words) <= 30 else text[:_tokens(text)[29][2]]
-                return {"id": "F17", "name": "Matches a known scam script", "severity": "high", "quote": quote,
-                        "chunk": chunk["index"],
-                        "timestamp_s": round(chunk["start_s"] + offset / WORDS_PER_SECOND, 1),
-                        "similarity": round(float(sims.max()), 3), "script_no": int(np.argmax(sims))}
-        return None
+                hits[chunk["index"]] = {
+                    "id": "F17", "name": "Matches a known scam script", "severity": "high", "quote": quote,
+                    "chunk": chunk["index"],
+                    "timestamp_s": round(chunk["start_s"] + offset / WORDS_PER_SECOND, 1),
+                    "similarity": round(float(sim), 3), "script_no": int(script_no)}
+        return [hits[i] for i in sorted(hits)]
+
+    def in_chunk(self, chunk):
+        """First F17 hit in one chunk (kept for the demo pipeline and validate_rules.py)."""
+        hits = self.match_call([chunk])
+        return hits[0] if hits else None
 
 
 def t06_holds(call, flags):

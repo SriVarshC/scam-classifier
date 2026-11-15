@@ -24,6 +24,23 @@ ARTIFACT = Path(__file__).resolve().parent / "artifacts" / "classifier.joblib"
 MAX_CLASSES = 20
 MAX_CLASS_LEN = 100
 FALLBACK_WORDS = 40
+MAX_TIMELINE_POINTS = 12  # the timeline is display data: ~12 points is plenty, 96 encodes is not
+
+
+def _timeline_indices(n_chunks):
+    """Windows whose cumulative classifier score the timeline needs: every k-th window plus the last,
+    so a 96-chunk call costs ~12 encodes instead of 96 (PERF.md P1-3)."""
+    if n_chunks <= 1:
+        return [0] if n_chunks else []
+    step = max(1, -(-n_chunks // MAX_TIMELINE_POINTS))  # ceil(n / MAX_TIMELINE_POINTS)
+    idx = list(range(step - 1, n_chunks, step))
+    if idx[-1] != n_chunks - 1:
+        idx.append(n_chunks - 1)
+    return idx
+
+
+def _prefix_text(chunks, last):
+    return " ".join(s["text"] for ch in chunks[:last + 1] for s in ch["segments"])
 
 
 def label_for(level, llm_verdict):
@@ -102,6 +119,11 @@ class ScamService:
     def llm_name(self):
         return f"{self.llm.provider}:{self.llm.model}" if self.llm else None
 
+    @property
+    def llm_timeout_s(self):
+        """Deadline the caller can compare with its own budget (PERF.md P1-1)."""
+        return self.llm.timeout_s if self.llm else None
+
     def _ask_llm(self, transcript):
         """Returns (llm_output or None, problem or None, backend). Backend: "gpu", "cpu" or None.
         GPU first when its tunnel is up; otherwise (or if the GPU call fails) the CPU model answers and,
@@ -129,21 +151,27 @@ class ScamService:
     def analyze(self, text, request_id):
         cfg = load_settings()
         call = {"id": request_id, "transcript": normalise(text), "chunks": chunk_call(text, "api")}
+        chunks = call["chunks"]
+        # F17 over the whole call in ONE batched encode, rules per window, and the classifier only on
+        # the windows the timeline shows (PERF.md P1-3). The decision uses the whole transcript below.
+        f17_by_chunk = {h["chunk"]: h for h in self.matcher.match_call(chunks)}
+        sampled = _timeline_indices(len(chunks))
+        prefix_scores = dict(zip(sampled, self.classifier.fraud_scores(
+            [_prefix_text(chunks, i) for i in sampled])))
         first, occurrences, timeline = {}, [], []
-        for i, chunk in enumerate(call["chunks"]):
+        for i, chunk in enumerate(chunks):
             new = rule_flags_in_chunk(chunk)
-            if "F17" not in first:
-                hit = self.matcher.in_chunk(chunk)
-                if hit:
-                    new.append(hit)
+            hit = f17_by_chunk.get(chunk["index"])
+            if hit and "F17" not in first:
+                new.append(hit)
             occurrences += new
             for f in new:
                 first.setdefault(f["id"], f)
-            so_far = " ".join(s["text"] for ch in call["chunks"][:i + 1] for s in ch["segments"])
-            clf = self.classifier.fraud_score(so_far)
+            if i not in prefix_scores:
+                continue
             reds = [f for f in first.values() if f["severity"] != "trust"]
             trust = [f for f in first.values() if f["severity"] == "trust"]
-            score, level, _ = compute_score(reds, trust, None, clf)
+            score, level, _ = compute_score(reds, trust, None, prefix_scores[i])
             timeline.append({"window": i, "end_s": chunk["end_s"], "risk_score": score, "level": level,
                              "new_flags": [f["id"] for f in new]})
 

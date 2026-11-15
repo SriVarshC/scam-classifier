@@ -24,9 +24,12 @@ Safety:
 All responses are cached in results/call_analysis/cache/llm/ (key = provider + model + prompt).
 """
 import hashlib
+import http.client
 import json
 import os
 import re
+import threading
+import urllib.parse
 import urllib.request
 
 from call_analysis import OUT
@@ -122,11 +125,47 @@ def _billions(param_size):
     return float(m.group(1)) / (1000 if m.group(2) == "M" else 1)
 
 
+class _KeepAlive:
+    """Reuse one HTTP(S) connection per thread and host (PERF.md P1-4); urllib opens a new socket for
+    every request. Connections are per thread because batch runs send several requests at once, and a
+    connection is dropped after any error so a stale socket is never reused."""
+
+    def __init__(self):
+        self._local = threading.local()
+
+    def request(self, url, body, headers, timeout):
+        parts = urllib.parse.urlsplit(url)
+        port = parts.port or (443 if parts.scheme == "https" else 80)
+        key = (parts.scheme, parts.hostname, port)
+        conns = getattr(self._local, "conns", None)
+        if conns is None:
+            conns = self._local.conns = {}
+        path = parts.path + (f"?{parts.query}" if parts.query else "")
+        conn = conns.get(key)
+        if conn is None:
+            factory = http.client.HTTPSConnection if parts.scheme == "https" else http.client.HTTPConnection
+            conn = conns[key] = factory(parts.hostname, port, timeout=timeout)
+        if conn.sock is not None:  # the deadline can change between requests (warm-up vs normal)
+            conn.sock.settimeout(timeout)
+        try:
+            conn.request("POST", path, body=body, headers=headers)
+            resp = conn.getresponse()
+            data = resp.read()
+            if resp.status >= 400:
+                raise urllib.error.HTTPError(url, resp.status, resp.reason, resp.headers, None)
+            return data
+        except BaseException:
+            conn.close()
+            conns.pop(key, None)
+            raise
+
+
 class CallLLM:
     def __init__(self, model=None, provider=None, host=None, use_cache=True, timeout_s=1800, retries=3):
         """use_cache=False for the live service: real callers' transcripts must not be written to disk.
         timeout_s / retries: the service uses a short timeout and no retries to fit the caller's deadline."""
         self.use_cache, self.timeout_s, self.retries = use_cache, timeout_s, retries
+        self._http = _KeepAlive()
         self.provider = (provider or os.environ.get("CALL_LLM_PROVIDER", "ollama")).lower()
         self.host = host or os.environ.get("OLLAMA_HOST_URL", "http://localhost:11434")
         if self.provider == "openai":
@@ -162,22 +201,26 @@ class CallLLM:
         for attempt in range(retries + 1):
             try:
                 return self._call_once(prompt)
-            except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError) as e:
+            except (OSError, http.client.HTTPException) as e:  # URLError/HTTPError/TimeoutError are OSErrors
                 if attempt == retries or (isinstance(e, urllib.error.HTTPError) and e.code < 500):
                     raise
                 print(f"[call_analysis] LLM request failed ({e}); retrying in {wait_s}s", flush=True)
                 time.sleep(wait_s)
+
+    def _post(self, url, body, headers=None):
+        """One JSON POST over the keep-alive connection (PERF.md P1-4)."""
+        payload = json.dumps(body).encode()
+        return json.loads(self._http.request(url, payload,
+                                             {"Content-Type": "application/json", **(headers or {})},
+                                             self.timeout_s))
 
     def _call_once(self, prompt):
         if self.provider == "openai":
             body = {"model": self.model, "temperature": 0, "seed": SEED,
                     "response_format": {"type": "json_object"},
                     "messages": [{"role": "user", "content": prompt}]}
-            req = urllib.request.Request(f"{self.api_url}/chat/completions", data=json.dumps(body).encode(),
-                                         headers={"Content-Type": "application/json",
-                                                  "Authorization": f"Bearer {self.api_key}"})
-            with urllib.request.urlopen(req, timeout=self.timeout_s) as r:
-                return json.loads(r.read())["choices"][0]["message"]["content"]
+            return self._post(f"{self.api_url}/chat/completions", body,
+                              {"Authorization": f"Bearer {self.api_key}"})["choices"][0]["message"]["content"]
         options = {"temperature": 0, "seed": SEED, "num_ctx": int(os.environ.get("CALL_LLM_NUM_CTX", "8192"))}
         # CPU-only servers: cap the answer length and pin the thread count (env vars; unset = Ollama default)
         for env, key in (("CALL_LLM_NUM_PREDICT", "num_predict"), ("CALL_LLM_NUM_THREAD", "num_thread")):
@@ -186,10 +229,7 @@ class CallLLM:
         body = {"model": self.model, "prompt": prompt, "stream": False, "format": "json",
                 "keep_alive": os.environ.get("CALL_LLM_KEEP_ALIVE", "30m"),  # avoid slow reloads between calls
                 "options": options}
-        req = urllib.request.Request(f"{self.host}/api/generate", data=json.dumps(body).encode(),
-                                     headers={"Content-Type": "application/json"})
-        with urllib.request.urlopen(req, timeout=self.timeout_s) as r:
-            return json.loads(r.read())["response"]
+        return self._post(f"{self.host}/api/generate", body)["response"]
 
     def _cached(self, prompt):
         if not self.use_cache:

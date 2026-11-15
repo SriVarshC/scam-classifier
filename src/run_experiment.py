@@ -11,6 +11,7 @@ import pandas as pd
 
 from config import PROCESSED, RESULTS
 from evaluate import binary_metrics, choose_threshold, fraud_score, predict_types, type_metrics
+from fit_cache import CACHEABLE, fit_or_load
 from models import MODELS, OPTIONAL_MODELS, ZeroShotLLM
 
 SPLITS = PROCESSED / "splits"
@@ -28,6 +29,21 @@ def load_split(name, merged):
 
 def truncate(texts, n=EARLY_WORDS):
     return [" ".join(t.split()[:n]) for t in texts]
+
+
+def fit_model(name, train, model_kwargs=None):
+    """Fit one model, or load the cached fit for these training ids + labels (PERF.md P2-2)."""
+    kwargs = dict(model_kwargs or {})
+    cls = {**MODELS, **OPTIONAL_MODELS}[name]
+    texts, labels = list(train["text"]), train["fraud_type"].tolist()
+    if name not in CACHEABLE:      # DeBERTa: GPU, never cached
+        return cls(**kwargs).fit(texts, labels)
+    return fit_or_load(name, lambda: cls(**kwargs), texts, labels, train["id"].tolist(), kwargs)
+
+
+def fmt(value):
+    """3 decimals, or 'NA' for an FPR that cannot be estimated (fewer than 100 genuine calls)."""
+    return "NA" if value is None or pd.isna(value) else f"{value:.3f}"
 
 
 def evaluate_one(model, parts, early):
@@ -56,8 +72,7 @@ def main(model_names, suffix="", model_kwargs=None, tests=None):
         parts = load_split(test, merged)
         for name in model_names:
             print(f"training {name} on {test} ({len(parts['train'])} calls)...", flush=True)
-            model = {**MODELS, **OPTIONAL_MODELS}[name](**(model_kwargs or {})).fit(
-                list(parts["train"]["text"]), parts["train"]["fraud_type"].tolist())
+            model = fit_model(name, parts["train"], model_kwargs)
             for early in (False, True):
                 variant = f"first{EARLY_WORDS}" if early else "full"
                 row, per_type, per_source = evaluate_one(model, parts, early)
@@ -66,8 +81,8 @@ def main(model_names, suffix="", model_kwargs=None, tests=None):
                                "f1": f, "support": s} for t, (f, s) in per_type.items()]
                 source_rows += [{"model": name, "test": test, "variant": variant, "source": s, **r}
                                 for s, r in per_source.iterrows()]
-                print(f"{name:14s} {test:22s} {variant:8s} FPR={row['fpr']:.3f} recall={row['recall']:.3f} "
-                      f"F1={row['f1_binary']:.3f} AUC={row['roc_auc']:.3f} "
+                print(f"{name:14s} {test:22s} {variant:8s} FPR={fmt(row['fpr']):>5s} "
+                      f"recall={row['recall']:.3f} F1={row['f1_binary']:.3f} AUC={row['roc_auc']:.3f} "
                       f"macroF1(types)={row['macro_f1_types']:.3f}", flush=True)
 
     RESULTS.mkdir(exist_ok=True)
@@ -81,14 +96,18 @@ def main(model_names, suffix="", model_kwargs=None, tests=None):
 
 
 def write_summary(metrics, per_type, suffix=""):
-    cols = ["model", "test", "variant", "fpr", "recall", "precision", "f1_binary", "roc_auc",
+    cols = ["model", "test", "variant", "fpr", "fpr_ci_low", "fpr_ci_high", "n_negatives",
+            "recall", "recall_ci_low", "recall_ci_high", "precision", "f1_binary", "roc_auc",
             "macro_f1_types", "tn", "fp", "fn", "tp"]
-    md = ["# Results\n", "Threshold chosen on validation so FPR <= 2%. `first50` = Test C (first 50 words).\n",
+    md = ["# Results\n",
+          "Threshold chosen on validation so FPR <= 1.5% (a margin inside the 2% target). `first50` = Test C "
+          "(first 50 words). FPR is **NA** when a test set has fewer than 100 genuine calls; all rates have "
+          "95% Wilson intervals. `macro_f1_types` covers the fixed F0-F9 set, so an absent type scores 0.\n",
           "## Binary scam detection + fraud-type macro F1\n", metrics[cols].round(3).to_markdown(index=False), ""]
     full = per_type[per_type["variant"] == "full"]
     pivot = full.pivot_table(index=["model", "test"], columns="fraud_type", values="f1").round(2)
     support = full.groupby("fraud_type")["support"].max()
-    md += ["## Per fraud type F1 (full transcripts; types absent from a test set are blank)\n",
+    md += ["## Per fraud type F1 (full transcripts; a type absent from a test set scores 0, support 0)\n",
            pivot.to_markdown(), "", "Max test support per type: " +
            ", ".join(f"{t}={s}" for t, s in support.items()), ""]
     (RESULTS / f"summary{suffix}.md").write_text("\n".join(md), encoding="utf-8")
@@ -119,18 +138,20 @@ def run_llm(llm_model, n_sample, n_early, workers=1):
                            "f1": f, "support": s} for k, (f, s) in per_type.items()]
             source_rows += [{"model": "zero_shot_llm", "test": test, "variant": variant, "source": s, **r}
                             for s, r in per_source.iterrows()]
-            print(f"LLM {test:22s} {variant:8s} n={len(parts['test']):3d} FPR={row['fpr']:.3f} "
+            print(f"LLM {test:22s} {variant:8s} n={len(parts['test']):3d} FPR={fmt(row['fpr']):>5s} "
                   f"recall={row['recall']:.3f} F1={row['f1_binary']:.3f} AUC={row['roc_auc']:.3f} "
                   f"macroF1(types)={row['macro_f1_types']:.3f}", flush=True)
     metrics = pd.DataFrame(rows)
     metrics.to_csv(RESULTS / "metrics_llm.csv", index=False)
     pd.DataFrame(type_rows).to_csv(RESULTS / "metrics_llm_per_type.csv", index=False)
     pd.DataFrame(source_rows).to_csv(RESULTS / "metrics_llm_per_source.csv", index=False)
-    cols = ["model", "test", "variant", "n_test", "fpr", "recall", "precision", "f1_binary", "roc_auc",
+    cols = ["model", "test", "variant", "n_test", "fpr", "fpr_ci_low", "fpr_ci_high", "n_negatives",
+            "recall", "recall_ci_low", "recall_ci_high", "precision", "f1_binary", "roc_auc",
             "macro_f1_types", "tn", "fp", "fn", "tp"]
     md = ["# Zero-shot LLM results\n",
           f"Model `{llm_model}` via Ollama, no training. Random sample of {n_sample} calls per test set "
-          f"({n_early} for `first{EARLY_WORDS}`); threshold from a shared validation sample (FPR <= 2%).\n",
+          f"({n_early} for `first{EARLY_WORDS}`); threshold from a shared validation sample (FPR <= 1.5%). "
+          "FPR is NA when a set has fewer than 100 genuine calls.\n",
           metrics[cols].round(3).to_markdown(index=False), ""]
     (RESULTS / "summary_llm.md").write_text("\n".join(md), encoding="utf-8")
     print(f"\nresults -> {RESULTS / 'summary_llm.md'}")
