@@ -21,6 +21,7 @@ REMOTE_PORT="${REMOTE_PORT:-11435}"
 IDLE_MIN="${IDLE_MIN:-30}"
 RENEW_MIN="${RENEW_MIN:-15}"
 MODEL="${MODEL:-qwen2.5:7b}"
+NUM_CTX="${NUM_CTX:-8192}"   # must match the service (CALL_LLM_NUM_CTX), or the first real call reloads the model
 PORT=$((20000 + SLURM_JOB_ID % 20000))
 LOCAL="${TMPDIR:-/tmp}/scam-llm-$SLURM_JOB_ID"
 log() { echo "$(date +%T) $*"; }
@@ -42,7 +43,7 @@ export OLLAMA_MODELS="$LOCAL/models" OLLAMA_HOST="127.0.0.1:$PORT" OLLAMA_KEEP_A
 OLL_PID=$!
 for _ in $(seq 120); do curl -s "127.0.0.1:$PORT/api/version" >/dev/null && break; sleep 1; done
 curl -s "127.0.0.1:$PORT/api/generate" \
-  -d "{\"model\":\"$MODEL\",\"prompt\":\"hi\",\"stream\":false,\"keep_alive\":-1,\"options\":{\"num_predict\":1}}" >/dev/null \
+  -d "{\"model\":\"$MODEL\",\"prompt\":\"hi\",\"stream\":false,\"keep_alive\":-1,\"options\":{\"num_predict\":1,\"num_ctx\":${NUM_CTX:-8192}}}" >/dev/null \
   || { log "model failed to load"; tail -20 "$LOCAL/serve.log"; exit 1; }
 log "model loaded on GPU"
 
