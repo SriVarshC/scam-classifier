@@ -1,8 +1,8 @@
 # PERF.md — performance review and improvement plan
 
 _Reviewed 2026-11-14. Scope: (1) model quality — the thing the project is actually judged on,
-(2) service latency/throughput, (3) research-pipeline wall-clock. This is a plan; no behaviour was
-changed._
+(2) service latency/throughput, (3) research-pipeline wall-clock. The code items were implemented the
+same day (see [§0.1](#01-what-is-implemented)); the data items stay open because they need real calls._
 
 **How this was produced:** read `src/`, `tests/`, `deploy/`, `config/scoring.yaml` and everything in
 `results/`, then microbenchmarked the non-LLM hot paths on this machine (macOS, CPU, `.venv`,
@@ -48,6 +48,21 @@ problem is **not** algorithmic inefficiency in the Python. It is:
 | P1-5 | Bound the in-process embedding cache | Service | Stops unbounded memory growth per caller | Small |
 | P2-1 | Length-sorted DeBERTa batches + early stopping + head/tail truncation | Research | Faster Colab runs; fewer truncated scam endings | Small–Medium |
 | P2-2 | Cache/reuse experiment fits; pin research deps | Research | Repeat runs and results become comparable | Small |
+
+### 0.1 What is implemented
+
+| Item | Change |
+|---|---|
+| P0-2 (reporting half) | `evaluate.type_metrics` scores the fixed F0–F9 set: a type absent from a test set scores 0 (support 0) instead of disappearing from the macro average |
+| P0-3 | threshold chosen at 1.5% FPR (margin inside the 2% target); FPR and recall reported with 95% Wilson intervals; FPR is `NA` when a test set has fewer than 100 genuine calls, and `n_negatives` is a column in `results/metrics.csv` |
+| P0-5 | F01 requires an un-negated request verb near the match: "we will never ask you for your PIN" and "we sent you a code" no longer fire, while "read me the code" and "do not tell anyone, now read me the code" do. Tests in `tests/test_call_analysis.py` |
+| P1-1 | deploy timeout 100 s → 25 s (compose + systemd); `/v1/status` exposes `llm_timeout_seconds` |
+| P1-3 | F17 encodes every caller segment of the call in one batch and one matrix multiply; the classifier is scored once on the full transcript for the decision and on at most 12 timeline windows (was one cumulative encode per window) |
+| P1-4 | `CallLLM` reuses one keep-alive HTTP(S) connection per thread instead of opening a socket per request |
+| P1-5 | service mode (`persist=False`) bypasses the embedding cache entirely, so caller text never accumulates in memory |
+| P2-2 | TF-IDF / embedding / keyword fits are cached by (model, hyper-parameters, training ids, labels) in `data/processed/fit_cache/`; `FIT_CACHE=0` bypasses the cache |
+
+Still open: P0-1, P0-2 (data), P0-4, P0-6, P0-7, P1-2, P1-6, P1-7, P2-1, P2-3 (deps pinning).
 
 ---
 

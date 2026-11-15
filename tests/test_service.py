@@ -104,3 +104,24 @@ def test_category_class_is_second(service):
     body = service.analyze("hi this is the bank, please read me the code we sent you", "t-cat")
     assert body["classes"][1] == "category:" + body["category"]
     assert body["category"] in {f"F{i}" for i in range(10)} | {"unknown"}
+
+
+def test_long_call_timeline_is_sampled(service):
+    """A 20-window call gets ~12 timeline points, not one classifier encode per window (PERF.md P1-3)."""
+    from call_analysis.chunking import chunk_call
+    text = " ".join([SCAM] * 20)
+    body = service.analyze(text, "long-call")
+    n_chunks = len(chunk_call(text, "api"))
+    assert n_chunks > 12
+    assert len(body["timeline"]) < n_chunks
+    assert body["timeline"][-1]["window"] == n_chunks - 1
+
+
+def test_service_does_not_cache_caller_text(service):
+    """persist=False bypasses the embedding cache: the in-memory dict must not grow (PERF.md P1-5)."""
+    from models import get_encoder
+    enc = get_encoder()
+    assert enc.persist is False
+    before = len(enc.cache)
+    service.analyze(SCAM + " A unique sentence for the embedding cache test.", "cache-test")
+    assert len(enc.cache) == before

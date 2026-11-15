@@ -76,7 +76,8 @@ def create_app(service=None, token=None):
     def status():
         svc = get_service()
         return {"llm_model": svc.llm_name, "llm_available": svc.llm is not None,
-                "llm_error": svc.llm_error, "max_text_chars": MAX_TEXT_CHARS,
+                "llm_error": svc.llm_error, "llm_timeout_seconds": svc.llm_timeout_s,
+                "max_text_chars": MAX_TEXT_CHARS,
                 "gpu_enabled": svc.gpu is not None, "gpu_ready": bool(svc.gpu and svc.gpu.ready(fresh=True))}
 
     def gpu_or_404():
